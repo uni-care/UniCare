@@ -1,0 +1,75 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Projects\\UniCare\\UniCare\\UniCare\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{BF492D25-703E-4225-8528-503385E719A8}|UniCare.Infrastructure\\UniCare.Infrastructure.csproj|c:\\projects\\unicare\\unicare\\unicare\\unicare.infrastructure\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BF492D25-703E-4225-8528-503385E719A8}|UniCare.Infrastructure\\UniCare.Infrastructure.csproj|solutionrelative:unicare.infrastructure\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CC6A19F6-624C-4BF1-B8B3-13BE60287574}|UniCare.Application\\UniCare.Application.csproj|c:\\projects\\unicare\\unicare\\unicare\\unicare.application\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CC6A19F6-624C-4BF1-B8B3-13BE60287574}|UniCare.Application\\UniCare.Application.csproj|solutionrelative:unicare.application\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{508D49ED-81A6-4E77-8825-7FA9AED5C7D7}|UniCare.Domain\\UniCare.Domain.csproj|c:\\projects\\unicare\\unicare\\unicare\\unicare.domain\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{508D49ED-81A6-4E77-8825-7FA9AED5C7D7}|UniCare.Domain\\UniCare.Domain.csproj|solutionrelative:unicare.domain\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Class1.cs",
+              "DocumentMoniker": "C:\\Projects\\UniCare\\UniCare\\UniCare\\UniCare.Infrastructure\\Class1.cs",
+              "RelativeDocumentMoniker": "UniCare.Infrastructure\\Class1.cs",
+              "ToolTip": "C:\\Projects\\UniCare\\UniCare\\UniCare\\UniCare.Infrastructure\\Class1.cs",
+              "RelativeToolTip": "UniCare.Infrastructure\\Class1.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-17T17:32:55.768Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Class1.cs",
+              "DocumentMoniker": "C:\\Projects\\UniCare\\UniCare\\UniCare\\UniCare.Application\\Class1.cs",
+              "RelativeDocumentMoniker": "UniCare.Application\\Class1.cs",
+              "ToolTip": "C:\\Projects\\UniCare\\UniCare\\UniCare\\UniCare.Application\\Class1.cs",
+              "RelativeToolTip": "UniCare.Application\\Class1.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-17T17:32:35.516Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Class1.cs",
+              "DocumentMoniker": "C:\\Projects\\UniCare\\UniCare\\UniCare\\UniCare.Domain\\Class1.cs",
+              "RelativeDocumentMoniker": "UniCare.Domain\\Class1.cs",
+              "ToolTip": "C:\\Projects\\UniCare\\UniCare\\UniCare\\UniCare.Domain\\Class1.cs",
+              "RelativeToolTip": "UniCare.Domain\\Class1.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-17T17:32:19.867Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
