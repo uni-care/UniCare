@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("UniCare.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2f9d9cb3a789810493f976f939b4c9cbaa3f93aa")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fcc74e5801cd1d6900204d27c4230381c4aaf1b6")]
 [assembly: System.Reflection.AssemblyProductAttribute("UniCare.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("UniCare.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

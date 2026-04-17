@@ -1,0 +1,45 @@
+# Build outputs
+bin/
+obj/
+out/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# IDE
+.vs/
+.idea/
+*.csproj.user
+
+# Package management
+packages/
+*.nupkg
+
+# Test results
+TestResults/
+*.trx
+
+# Logs
+*.log
+*.pid
+
+# Environment & secrets
+appsettings.Development.json
+appsettings.Production.json
+*.secrets.json
+.env
+
+# Database files (if using local DB)
+*.mdf
+*.ldf
+*.db
+*.sqlite
+
+# EF Core – do NOT ignore Migrations folder by default
+# If you truly want to ignore migrations, uncomment the line below:
+# Migrations/
+
+# But recommended: commit Migrations/
