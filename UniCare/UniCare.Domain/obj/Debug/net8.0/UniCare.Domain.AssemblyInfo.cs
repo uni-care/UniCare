@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("UniCare.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fcc74e5801cd1d6900204d27c4230381c4aaf1b6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+61e2ca090d87d3451086fd0bb48a96d433a5c742")]
 [assembly: System.Reflection.AssemblyProductAttribute("UniCare.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("UniCare.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
