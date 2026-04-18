@@ -17,4 +17,10 @@
     <Folder Include="Controllers\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\UniCare.Application\UniCare.Application.csproj" />
+    <ProjectReference Include="..\UniCare.Domain\UniCare.Domain.csproj" />
+    <ProjectReference Include="..\UniCare.Infrastructure\UniCare.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>
