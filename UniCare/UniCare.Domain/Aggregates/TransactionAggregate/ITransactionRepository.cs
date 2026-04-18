@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace UniCare.Domain.Aggregates.TransactionAggregate
 {
-    public interface ITransactionRepository
-    {
+ 
         public interface ITransactionRepository
         {
             Task<Transaction?> GetByIdAsync(Guid id, CancellationToken ct = default);
@@ -18,5 +17,4 @@ namespace UniCare.Domain.Aggregates.TransactionAggregate
             Task UpdateAsync(Transaction transaction, CancellationToken ct = default);
         }
 
-    }
 }
