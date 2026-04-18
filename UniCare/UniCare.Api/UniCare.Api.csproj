@@ -7,11 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MediatR" Version="14.1.0" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.3.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
+	
+	<ItemGroup>
+		<ProjectReference Include="..\UniCare.Domain\UniCare.Domain.csproj" />
+		<ProjectReference Include="..\UniCare.Infrastructure\UniCare.Infrastructure.csproj" />
+		<ProjectReference Include="..\UniCare.Application\UniCare.Application.csproj" />
+	</ItemGroup>
 
 </Project>

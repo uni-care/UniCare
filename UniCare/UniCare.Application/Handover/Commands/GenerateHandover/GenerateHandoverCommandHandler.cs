@@ -57,7 +57,7 @@ namespace UniCare.Application.TransactionHandover.Commands.GenerateHandover
 
             await _repository.AddAsync(handover, cancellationToken);
 
-            // QR payload — the mobile app encodes this JSON string into a QR image.
+            // QR payload —  encode this JSON string into a QR image.
             // On scan, it extracts the PIN and calls the verify endpoint automatically.
             var qrPayload = JsonSerializer.Serialize(new
             {
