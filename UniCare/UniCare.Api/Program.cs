@@ -1,6 +1,6 @@
 using System.Reflection;
 using Microsoft.OpenApi.Models;
-using UniCare.Api.Middleware;
+using UniCare.Api.Middelware;
 using UniCare.Application;
 using Microsoft.IdentityModel.Tokens;
 using UniCare.Infrastructure;
