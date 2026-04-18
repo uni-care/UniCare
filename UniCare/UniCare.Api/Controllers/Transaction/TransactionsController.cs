@@ -39,8 +39,8 @@ namespace UniCare.Api.Controllers.Transaction
                 : BadRequest(new { error = result.Error });
         }
 
-        
-        
+
+
         [HttpGet("{id:guid}/code")]
         [ProducesResponseType(typeof(GenerateHandoverResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -70,7 +70,7 @@ namespace UniCare.Api.Controllers.Transaction
                 : BadRequest(new { error = generateResult.Error });
         }
 
-   
+
         [HttpPost("{id:guid}/verify-code")]
         [ProducesResponseType(typeof(VerifyAndAdvanceResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

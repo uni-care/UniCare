@@ -16,54 +16,51 @@ namespace UniCare.Api.Controllers.Handover
 
         public HandoverController(ISender sender) => _sender = sender;
 
-        /// Generate a handover PIN + QR payload for a transaction.
-        /// Call this when both parties are physically together to hand over the item.
-        /// Handover types: 1 = SaleDelivery | 2 = RentalStart | 3 = RentalReturn
-        [HttpPost("generate")]
-        [ProducesResponseType(typeof(GenerateHandoverResult), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Generate(
-            Guid transactionId,
-            [FromBody] GenerateHandoverRequest request,
-            CancellationToken ct)
-        {
-            var command = new GenerateHandoverCommand(
-                TransactionId: transactionId,
-                Type: request.Type,
-                GeneratedForUserId: request.GeneratedForUserId,
-                VerifiedByUserId: request.VerifiedByUserId
-            );
+        //[HttpPost("generate")]
+        //[ProducesResponseType(typeof(GenerateHandoverResult), StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+        //public async Task<IActionResult> Generate(
+        //    Guid transactionId,
+        //    [FromBody] GenerateHandoverRequest request,
+        //    CancellationToken ct)
+        //{
+        //    var command = new GenerateHandoverCommand(
+        //        TransactionId: transactionId,
+        //        Type: request.Type,
+        //        GeneratedForUserId: request.GeneratedForUserId,
+        //        VerifiedByUserId: request.VerifiedByUserId
+        //    );
 
-            var result = await _sender.Send(command, ct);
+        //    var result = await _sender.Send(command, ct);
 
-            return result.IsSuccess
-                ? Ok(result.Value)
-                : BadRequest(new { error = result.Error });
-        }
+        //    return result.IsSuccess
+        //        ? Ok(result.Value)
+        //        : BadRequest(new { error = result.Error });
+        //}
 
         /// Verify a handover PIN.
         /// Accepts the PIN typed manually OR decoded from a QR scan — same endpoint, same field.
-        [HttpPost("verify")]
-        [ProducesResponseType(typeof(VerifyHandoverResult), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Verify(
-            Guid transactionId,
-            [FromBody] VerifyHandoverRequest request,
-            CancellationToken ct)
-        {
-            var command = new VerifyHandoverCommand(
-                TransactionId: transactionId,
-                Type: request.Type,
-                VerifyingUserId: request.VerifyingUserId,
-                RawPin: request.Pin
-            );
+        //[HttpPost("verify")]
+        //[ProducesResponseType(typeof(VerifyHandoverResult), StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+        //public async Task<IActionResult> Verify(
+        //    Guid transactionId,
+        //    [FromBody] VerifyHandoverRequest request,
+        //    CancellationToken ct)
+        //{
+        //    var command = new VerifyHandoverCommand(
+        //        TransactionId: transactionId,
+        //        Type: request.Type,
+        //        VerifyingUserId: request.VerifyingUserId,
+        //        RawPin: request.Pin
+        //    );
 
-            var result = await _sender.Send(command, ct);
+        //    var result = await _sender.Send(command, ct);
 
-            return result.IsSuccess
-                ? Ok(result.Value)
-                : BadRequest(new { error = result.Error });
-        }
+        //    return result.IsSuccess
+        //        ? Ok(result.Value)
+        //        : BadRequest(new { error = result.Error });
+        //}
 
         /// Get the current status of a handover code (Pending / Verified / Expired).
         [HttpGet("status")]
