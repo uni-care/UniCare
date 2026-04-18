@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UniCare.Domain.Enums;
 
-namespace UniCare.Domain.Entities;
+namespace UniCare.Domain.Aggregates.UserAggregates;
 
 public class StudentVerification
 {

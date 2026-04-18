@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using UniCare.Domain.Enums;
 
-namespace UniCare.Domain.Entities;
+namespace UniCare.Domain.Aggregates.UserAggregates;
 
 public class ApplicationUser : IdentityUser<Guid>
 {
