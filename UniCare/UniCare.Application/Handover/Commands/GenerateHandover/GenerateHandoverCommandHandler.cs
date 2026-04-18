@@ -4,20 +4,22 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using UniCare.Application.TransactionHandover.DTOs;
+using UniCare.Application.Common;
+using UniCare.Application.Common.cqrs;
 using UniCare.Domain.Aggregates.TransactionHandover;
 
-namespace UniCare.Application.TransactionHandover.UseCases
+namespace UniCare.Application.TransactionHandover.Commands.GenerateHandover
 {
-    public class GenerateHandoverUseCase
+    public sealed class GenerateHandoverCommandHandler
+     : ICommandHandler<GenerateHandoverCommand, Result<GenerateHandoverResult>>
     {
         private readonly ITransactionHandoverRepository _repository;
         private readonly IPinGeneratorService _pinGenerator;
 
-        // PINs expire after 30 minutes — long enough for meetups, short enough to limit risk
+        // PINs expire after 30 minutes — enough time for in-person meetups
         private static readonly TimeSpan PinLifetime = TimeSpan.FromMinutes(30);
 
-        public GenerateHandoverUseCase(
+        public GenerateHandoverCommandHandler(
             ITransactionHandoverRepository repository,
             IPinGeneratorService pinGenerator)
         {
@@ -25,23 +27,25 @@ namespace UniCare.Application.TransactionHandover.UseCases
             _pinGenerator = pinGenerator;
         }
 
-        public async Task<GenerateHandoverResponse> ExecuteAsync(
+        public async Task<Result<GenerateHandoverResult>> Handle(
             GenerateHandoverCommand command,
-            CancellationToken ct = default)
+            CancellationToken cancellationToken)
         {
-            // Expire any old pending code for the same transaction+type
+            // Invalidate any existing pending code for same transaction + type
             var existing = await _repository.GetPendingByTransactionAndTypeAsync(
-                command.TransactionId, command.Type, ct);
+                command.TransactionId, command.Type, cancellationToken);
 
             if (existing is not null)
+            {
                 existing.Expire();
+                await _repository.UpdateAsync(existing, cancellationToken);
+            }
 
-            // Generate new PIN and hash it for storage
             var rawPin = _pinGenerator.GeneratePin();
             var pinHash = _pinGenerator.HashPin(rawPin);
             var expiresAt = DateTime.UtcNow.Add(PinLifetime);
 
-            var handover = TransactionHandover.Create(
+            var handover = UniCare.Domain.Aggregates.TransactionHandover.TransactionHandover.Create(
                 transactionId: command.TransactionId,
                 type: command.Type,
                 pin: rawPin,
@@ -51,9 +55,10 @@ namespace UniCare.Application.TransactionHandover.UseCases
                 expiresAt: expiresAt
             );
 
-            await _repository.AddAsync(handover, ct);
+            await _repository.AddAsync(handover, cancellationToken);
 
-            // QR payload encodes enough info for the scanner to call the verify endpoint
+            // QR payload — the mobile app encodes this JSON string into a QR image.
+            // On scan, it extracts the PIN and calls the verify endpoint automatically.
             var qrPayload = JsonSerializer.Serialize(new
             {
                 handoverId = handover.Id,
@@ -62,12 +67,14 @@ namespace UniCare.Application.TransactionHandover.UseCases
                 pin = rawPin
             });
 
-            return new GenerateHandoverResponse(
+            return Result<GenerateHandoverResult>.Success(new GenerateHandoverResult(
                 HandoverId: handover.Id,
                 Pin: rawPin,
                 QrPayload: qrPayload,
                 Type: command.Type,
                 ExpiresAt: expiresAt
-            );
+            ));
         }
     }
+
+}
