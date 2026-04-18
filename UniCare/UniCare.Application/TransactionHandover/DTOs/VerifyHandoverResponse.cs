@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace UniCare.Application.TransactionHandover.DTOs
 {
-    internal class VerifyHandoverResponse
-    {
-    }
+    public record VerifyHandoverResponse(
+    bool Success,
+    string Message,
+    DateTime? VerifiedAt
+);
 }
