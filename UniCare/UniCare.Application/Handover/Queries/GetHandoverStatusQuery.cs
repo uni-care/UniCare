@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using UniCare.Application.Common;
 using UniCare.Application.Common.cqrs;
-using UniCare.Domain.Aggregates.TransactionHandover;
+using UniCare.Domain.Aggregates.TransactionHandoverAggregate;
 
-namespace UniCare.Application.TransactionHandover.Queries
+namespace UniCare.Application.Handover.Queries
 {
     public sealed record GetHandoverStatusQuery(
       Guid TransactionId,

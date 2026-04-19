@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using UniCare.Application.Common;
 using UniCare.Application.Common.cqrs;
 using UniCare.Domain.Aggregates.TransactionAggregate;
-using UniCare.Domain.Aggregates.TransactionHandover;
+using UniCare.Domain.Aggregates.TransactionHandoverAggregate;
 
 namespace UniCare.Application.Transactions.Commands.CreateTransaction
 {

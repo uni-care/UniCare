@@ -1,8 +1,8 @@
 ﻿using UniCare.Application.Common;
 using UniCare.Application.Common.cqrs;
-using UniCare.Domain.Aggregates.TransactionHandover;
+using UniCare.Domain.Aggregates.TransactionHandoverAggregate;
 
-namespace UniCare.Application.TransactionHandover.Commands.GenerateHandover
+namespace UniCare.Application.Handover.Commands.GenerateHandover
 {
     public record GenerateHandoverCommand(
       Guid TransactionId,

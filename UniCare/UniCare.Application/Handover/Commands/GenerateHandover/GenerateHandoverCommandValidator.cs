@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UniCare.Application.TransactionHandover.Commands.GenerateHandover
+namespace UniCare.Application.Handover.Commands.GenerateHandover
 {
     public sealed class GenerateHandoverCommandValidator : AbstractValidator<GenerateHandoverCommand>
     {

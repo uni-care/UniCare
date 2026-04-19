@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UniCare.Domain.Aggregates.TransactionHandover;
+using UniCare.Domain.Aggregates.TransactionHandoverAggregate;
 using UniCare.Infrastructure.Persistence;
 
 namespace UniCare.Infrastructure.Repositories

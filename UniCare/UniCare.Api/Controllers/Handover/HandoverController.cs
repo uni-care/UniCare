@@ -1,10 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using UniCare.Api.Controllers.Handover.Requests;
-using UniCare.Application.TransactionHandover.Commands.GenerateHandover;
-using UniCare.Application.TransactionHandover.Commands.VerifyHandover;
-using UniCare.Application.TransactionHandover.Queries;
-using UniCare.Domain.Aggregates.TransactionHandover;
+using UniCare.Application.Handover.Queries;
+using UniCare.Domain.Aggregates.TransactionHandoverAggregate;
 
 namespace UniCare.Api.Controllers.Handover
 {
