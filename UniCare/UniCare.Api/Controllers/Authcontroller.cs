@@ -32,7 +32,6 @@ namespace UniCare.Api.Controllers
                 Email = request.Email,
                 PhoneNumber = request.PhoneNumber,
                 Password = request.Password,
-                GoogleIdToken = request.GoogleIdToken,
                 RegistrationMethod = request.RegistrationMethod
             };
 
