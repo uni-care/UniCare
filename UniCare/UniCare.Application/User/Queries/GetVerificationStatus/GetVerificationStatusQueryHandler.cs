@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using UniCare.Application.Common;
 using UniCare.Application.User.DTOs.Verification;
 using UniCare.Domain.Aggregates.UserAggregates;
+using UniCare.Domain.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace UniCare.Application.User.Queries.GetVerificationStatus
 {

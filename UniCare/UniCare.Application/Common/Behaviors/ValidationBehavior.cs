@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using MediatR;
-using System.ComponentModel.DataAnnotations;
 using UniCare.Application.Common;
 
 namespace UniCare.Application.Common.Behaviors;

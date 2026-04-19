@@ -8,6 +8,7 @@ using UniCare.Application.Common;
 using UniCare.Application.User.DTOs.Auth;
 using UniCare.Domain.Aggregates.UserAggregates;
 using Microsoft.AspNetCore.Identity;
+using UniCare.Application.Interfaces;
 
 
 namespace UniCare.Application.User.commands.Auth.Login

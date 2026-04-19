@@ -11,7 +11,7 @@ namespace UniCare.Infrastructure.Persistence.Repositories
 {
     public class ItemRepository : BaseRepository<Item>, IItemRepository
     {
-        public ItemRepository(AppDbContext context) : base(context)
+        public ItemRepository(UniCareDbContext context) : base(context)
         {
         }
 

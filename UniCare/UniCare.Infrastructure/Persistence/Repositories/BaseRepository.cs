@@ -10,10 +10,10 @@ namespace UniCare.Infrastructure.Persistence.Repositories
 {
     public abstract class BaseRepository<T> : IBaseRepository<T> where T : BaseEntity
     {
-        protected readonly AppDbContext _context;
+        protected readonly UniCareDbContext _context;
         protected readonly DbSet<T> _dbSet;
 
-        protected BaseRepository(AppDbContext context)
+        protected BaseRepository(UniCareDbContext context)
         {
             _context = context;
             _dbSet = context.Set<T>();

@@ -10,7 +10,9 @@ using UniCare.Application.Common;
 using UniCare.Application.User.DTOs.Verification;
 using UniCare.Domain.Aggregates.UserAggregates;
 using UniCare.Domain.Enums;
-
+using UniCare.Domain.Interfaces;
+using UniCare.Application.Interfaces;
+using Microsoft.EntityFrameworkCore;
 namespace UniCare.Application.User.commands.UploadID
 {
     public class UploadIdCommandHandler : IRequestHandler<UploadIdCommand, Result<UploadIdResponseDto>>
