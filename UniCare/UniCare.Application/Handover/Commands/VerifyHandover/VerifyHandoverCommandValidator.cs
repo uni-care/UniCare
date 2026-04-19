@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UniCare.Application.TransactionHandover.Commands.VerifyHandover
+namespace UniCare.Application.Handover.Commands.VerifyHandover
 {
     public sealed class VerifyHandoverCommandValidator : AbstractValidator<VerifyHandoverCommand>
     {

@@ -1,15 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using UniCare.Domain.Aggregates.ChatAggregate;
 using UniCare.Domain.Aggregates.TransactionAggregate;
-using UniCare.Domain.Aggregates.TransactionHandover;
+using UniCare.Domain.Aggregates.TransactionHandoverAggregate;
+using UniCare.Infrastructure.Hubs;
 using UniCare.Infrastructure.Persistence;
 using UniCare.Infrastructure.Repositories;
+using UniCare.Infrastructure.Services;
 
 namespace UniCare.Infrastructure
 {
@@ -24,9 +23,21 @@ namespace UniCare.Infrastructure
 
             services.AddScoped<ITransactionHandoverRepository, TransactionHandoverRepository>();
             services.AddScoped<ITransactionRepository, TransactionRepository>();
+            services.AddScoped<IChatRepository, ChatRepository>();
+
             services.AddSingleton<IPinGeneratorService, PinGeneratorService>();
 
+            services.AddScoped<IChatNotificationService, SignalRChatNotificationService>();
+
+            services.AddSignalR();
+
             return services;
+        }
+
+        public static WebApplication UseInfrastructure(this WebApplication app)
+        {
+            app.MapHub<ChatHub>("/hubs/chat");
+            return app;
         }
     }
 }

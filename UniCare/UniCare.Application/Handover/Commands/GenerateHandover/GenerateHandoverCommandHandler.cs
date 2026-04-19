@@ -6,9 +6,9 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using UniCare.Application.Common;
 using UniCare.Application.Common.cqrs;
-using UniCare.Domain.Aggregates.TransactionHandover;
+using UniCare.Domain.Aggregates.TransactionHandoverAggregate;
 
-namespace UniCare.Application.TransactionHandover.Commands.GenerateHandover
+namespace UniCare.Application.Handover.Commands.GenerateHandover
 {
     public sealed class GenerateHandoverCommandHandler
      : ICommandHandler<GenerateHandoverCommand, Result<GenerateHandoverResult>>
@@ -45,7 +45,7 @@ namespace UniCare.Application.TransactionHandover.Commands.GenerateHandover
             var pinHash = _pinGenerator.HashPin(rawPin);
             var expiresAt = DateTime.UtcNow.Add(PinLifetime);
 
-            var handover = UniCare.Domain.Aggregates.TransactionHandover.TransactionHandover.Create(
+            var handover = TransactionHandover.Create(
                 transactionId: command.TransactionId,
                 type: command.Type,
                 pin: rawPin,

@@ -1,4 +1,4 @@
-﻿using UniCare.Domain.Aggregates.TransactionHandover;
+﻿using UniCare.Domain.Aggregates.TransactionHandoverAggregate;
 
 namespace UniCare.Api.Controllers.Handover.Requests
 {
