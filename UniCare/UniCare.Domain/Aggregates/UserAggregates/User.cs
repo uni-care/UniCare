@@ -3,7 +3,7 @@ using UniCare.Domain.Enums;
 
 namespace UniCare.Domain.Aggregates.UserAggregates;
 
-public class ApplicationUser : IdentityUser<Guid>
+public class User : IdentityUser<Guid>
 {
     public string FullName { get; set; } = string.Empty;
     public string? UniversityName { get; set; }

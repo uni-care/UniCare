@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UniCare.Domain.Aggregates.UserAggregate;
+using UniCare.Domain.Aggregates.UserAggregates;
 
 namespace UniCare.Application.Item.Commands.ToggleFavorite
 {

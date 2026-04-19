@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using UniCare.Domain.Aggregates.ItemAggregates;
 using UniCare.Domain.Common;
 
-namespace UniCare.Domain.Aggregates.UserAggregate
+namespace UniCare.Domain.Aggregates.UserAggregates
 {
     public class UserFavorite : BaseEntity
     {

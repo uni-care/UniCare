@@ -6,7 +6,7 @@ using UniCare.Application.Common;
 using UniCare.Application.User.DTOs.Profile;
 using UniCare.Application.User.Queries.GetCurrentProfile;
 
-namespace UniCare.Api.Controllers
+namespace UniCare.Api.Controllers.User
 {
     [ApiController]
     [Route("api/v1/profile")]

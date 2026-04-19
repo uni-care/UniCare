@@ -34,7 +34,7 @@ namespace UniCare.Infrastructure
             services.AddScoped<IApplicationDbContext>(provider =>
                 provider.GetRequiredService<UniCareDbContext>());
 
-            services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
+            services.AddIdentity<User, IdentityRole<Guid>>(options =>
             {
                 // Password policy
                 options.Password.RequireDigit = true;

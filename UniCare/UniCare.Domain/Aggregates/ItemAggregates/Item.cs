@@ -4,8 +4,9 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using UniCare.Domain.Aggregates.ItemAggregates.Domain.Entities;
+using UniCare.Domain.Aggregates.UserAggregates;
 using UniCare.Domain.Common;
+using UniCare.Domain.Enums;
 
 namespace UniCare.Domain.Aggregates.ItemAggregates
 {

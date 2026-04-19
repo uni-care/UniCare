@@ -21,7 +21,7 @@ namespace UniCare.Infrastructure.Services
         public JwtService(IOptions<JwtSettings> options)
             => _settings = options.Value;
 
-        public string GenerateToken(ApplicationUser user)
+        public string GenerateToken(User user)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.Secret));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

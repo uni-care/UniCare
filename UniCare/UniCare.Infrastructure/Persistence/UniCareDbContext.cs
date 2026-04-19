@@ -14,7 +14,7 @@ using UniCare.Domain.Aggregates.ItemAggregates;
 
 namespace UniCare.Infrastructure.Persistence
 {
-    public class UniCareDbContext : IdentityDbContext<ApplicationUser, Microsoft.AspNetCore.Identity.IdentityRole<Guid>, Guid>,
+    public class UniCareDbContext : IdentityDbContext<User, Microsoft.AspNetCore.Identity.IdentityRole<Guid>, Guid>,
      IApplicationDbContext
     {
         public UniCareDbContext(DbContextOptions<UniCareDbContext> options) : base(options) { }
@@ -87,7 +87,7 @@ namespace UniCare.Infrastructure.Persistence
                 entity.HasIndex(e => new { e.OwnerId, e.Status });
                 entity.HasIndex(e => new { e.RequesterId, e.Status });
             });
-            builder.Entity<ApplicationUser>().ToTable("UniCare_Users");
+            builder.Entity<User>().ToTable("UniCare_Users");
             builder.Entity<Microsoft.AspNetCore.Identity.IdentityRole<Guid>>().ToTable("UniCare_Roles");
             builder.Entity<Microsoft.AspNetCore.Identity.IdentityUserRole<Guid>>().ToTable("UniCare_UserRoles");
             builder.Entity<Microsoft.AspNetCore.Identity.IdentityUserClaim<Guid>>().ToTable("UniCare_UserClaims");
