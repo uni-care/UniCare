@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using UniCare.Application.Common;
 using UniCare.Application.User.DTOs.Verification;
 using UniCare.Domain.Aggregates.UserAggregates;
+using UniCare.Domain.Interfaces;
 
 namespace UniCare.Application.User.Queries.GetVerificationStatus
 {

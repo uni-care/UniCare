@@ -1,15 +1,18 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UniCare.Application.Common;
+using UniCare.Application.Interfaces;
 using UniCare.Application.User.DTOs.Verification;
 using UniCare.Domain.Aggregates.UserAggregates;
 using UniCare.Domain.Enums;
+using UniCare.Domain.Interfaces;
 
 namespace UniCare.Application.User.commands.UploadID
 {

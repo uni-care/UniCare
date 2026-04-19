@@ -2,6 +2,7 @@
 using MediatR;
 using System.ComponentModel.DataAnnotations;
 using UniCare.Application.Common;
+using ValidationException = FluentValidation.ValidationException;
 
 namespace UniCare.Application.Common.Behaviors;
 

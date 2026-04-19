@@ -28,7 +28,7 @@ public class Program
             {
                 Title = "UniCare API",
                 Version = "v1",
-                Description = "Peer-to-peer marketplace for university students — Authentication & Verification module.",
+                Description = "Peer-to-peer marketplace for university students ï¿½ Authentication & Verification module.",
                 Contact = new OpenApiContact { Name = "UniCare Team" }
             });
 
@@ -77,15 +77,24 @@ public class Program
 
         app.UseGlobalExceptionHandler();
 
-        if (app.Environment.IsDevelopment())
+        //if (app.Environment.IsDevelopment())
+        //{
+        //    app.UseSwagger();
+        //    app.UseSwaggerUI(); c =>
+        //{
+        //    c.SwaggerEndpoint("/swagger/v1/swagger.json", "UniCare API v1");
+        //    c.RoutePrefix = string.Empty;
+        //});
+        //}
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
         {
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "UniCare API v1");
-                c.RoutePrefix = string.Empty;
-            });
-        }
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "UniCare API v1");
+            c.RoutePrefix = "swagger"; // Explicitly set route prefix
+
+            c.DocumentTitle = "UniCare API Documentation";
+            c.DisplayRequestDuration();
+        });
 
         app.UseHttpsRedirection();
 
@@ -97,6 +106,7 @@ public class Program
         app.UseAuthorization();
 
         app.MapControllers();
+
 
         app.Run();
     }
