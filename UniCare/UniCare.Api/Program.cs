@@ -33,10 +33,10 @@ public class Program
             });
 
 
-            //var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            //var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-            //if (File.Exists(xmlPath))
-            //    options.IncludeXmlComments(xmlPath);
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            if (File.Exists(xmlPath))
+                options.IncludeXmlComments(xmlPath);
 
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
