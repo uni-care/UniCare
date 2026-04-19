@@ -3,6 +3,7 @@ using Microsoft.OpenApi.Models;
 using UniCare.Api.Middelware;
 using UniCare.Application;
 using Microsoft.IdentityModel.Tokens;
+using UniCare.Application;
 using UniCare.Infrastructure;
 
 namespace UniCare.Api;
