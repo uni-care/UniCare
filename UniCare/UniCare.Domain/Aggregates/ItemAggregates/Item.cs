@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UniCare.Domain.Aggregates.UserAggregates;
 using UniCare.Domain.Common;
 
 namespace UniCare.Domain.Aggregates.ItemAggregates
@@ -14,6 +15,8 @@ namespace UniCare.Domain.Aggregates.ItemAggregates
         public decimal Price { get; private set; }
         public int Quantity { get; private set; }
         public bool IsAvailable { get; private set; }
+        public virtual ApplicationUser Owner { get; set; } = null!;
+        public virtual Guid OwnerId { get; set; }
 
         private Item() { } // EF Core
 

@@ -25,7 +25,7 @@ namespace UniCare.Api.Controllers.Chat
             CancellationToken ct)
         {
             var result = await _sender.Send(new GetUserChatsQuery(userId), ct);
-            return result.IsSuccess ? Ok(result.Value) : BadRequest(new { error = result.Error });
+            return result.IsSuccess ? Ok(result) : BadRequest(new { error = result.ErrorMessage });
         }
 
         [HttpPost("for-transaction")]
@@ -41,7 +41,7 @@ namespace UniCare.Api.Controllers.Chat
                 RequesterId: request.RequesterId);
 
             var result = await _sender.Send(command, ct);
-            return result.IsSuccess ? Ok(result.Value) : BadRequest(new { error = result.Error });
+            return result.IsSuccess ? Ok(result) : BadRequest(new { error = result.ErrorMessage });
         }
 
         /// Returns a paged list of messages for a chat thread (oldest-first).
@@ -60,8 +60,8 @@ namespace UniCare.Api.Controllers.Chat
             var result = await _sender.Send(query, ct);
 
             return result.IsSuccess
-                ? Ok(result.Value)
-                : NotFound(new { error = result.Error });
+                ? Ok(result)
+                : NotFound(new { error = result.ErrorMessage });
         }
 
         /// Sends a message. Also pushes "ReceiveMessage" to all connected clients via SignalR.
@@ -82,8 +82,8 @@ namespace UniCare.Api.Controllers.Chat
             var result = await _sender.Send(command, ct);
 
             return result.IsSuccess
-                ? CreatedAtAction(nameof(GetMessages), new { chatId }, result.Value)
-                : BadRequest(new { error = result.Error });
+                ? CreatedAtAction(nameof(GetMessages), new { chatId }, result)
+                : BadRequest(new { error = result.ErrorMessage });
         }
 
         /// Marks all messages in the chat as read for the given user.
@@ -99,7 +99,7 @@ namespace UniCare.Api.Controllers.Chat
             var command = new MarkMessagesReadCommand(chatId, request.ReaderId);
             var result = await _sender.Send(command, ct);
 
-            return result.IsSuccess ? NoContent() : BadRequest(new { error = result.Error });
+            return result.IsSuccess ? NoContent() : BadRequest(new { error = result.ErrorMessage });
         }
     }
 }
