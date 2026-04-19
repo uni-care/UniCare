@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.SignalR;
 using System.Reflection;
 using Microsoft.OpenApi.Models;
 using UniCare.Api.Middelware;
-using UniCare.Application;
 using Microsoft.IdentityModel.Tokens;
 using UniCare.Application;
 using UniCare.Infrastructure;
@@ -16,14 +15,32 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-
+        // Add services to the container
         builder.Services.AddControllers();
 
+        // Register application and infrastructure services (ONCE)
         builder.Services.AddApplication();
         builder.Services.AddInfrastructure(builder.Configuration);
 
         builder.Services.AddDirectoryBrowser();
 
+        // Add CORS (MUST be registered here, NOT inside Swagger configuration)
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAll", policy =>
+                policy.AllowAnyOrigin()
+                      .AllowAnyMethod()
+                      .AllowAnyHeader());
+
+            // Alternative: More secure policy for production with credentials
+            options.AddPolicy("AllowSpecific", policy =>
+                policy.WithOrigins("http://localhost:3000", "https://yourdomain.com")
+                      .AllowAnyMethod()
+                      .AllowAnyHeader()
+                      .AllowCredentials());
+        });
+
+        // Add Swagger
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(options =>
         {
@@ -31,30 +48,17 @@ public class Program
             {
                 Title = "UniCare API",
                 Version = "v1",
-                Description = "Peer-to-peer marketplace for university students � Authentication & Verification module.",
+                Description = "Peer-to-peer marketplace for university students - Authentication & Verification module.",
                 Contact = new OpenApiContact { Name = "UniCare Team" }
             });
 
-            // CORS is required for SignalR WebSocket handshake from a browser client.
-            // Tighten AllowedOrigins before deploying to production.
-            builder.Services.AddCors(options =>
-            {
-                options.AddDefaultPolicy(policy =>
-                    policy.AllowAnyHeader()
-                          .AllowAnyMethod()
-                          .AllowCredentials()
-                          .SetIsOriginAllowed(_ => true));
-            });
-
-            // Clean Architecture layers
-            builder.Services.AddApplication();                          // MediatR + Validators + Pipeline
-            builder.Services.AddInfrastructure(builder.Configuration); // EF Core + Repos + Services + SignalR
-
+            // Include XML comments if they exist
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
             if (File.Exists(xmlPath))
                 options.IncludeXmlComments(xmlPath);
 
+            // Add JWT authentication to Swagger
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Name = "Authorization",
@@ -73,7 +77,7 @@ public class Program
                         Reference = new OpenApiReference
                         {
                             Type = ReferenceType.SecurityScheme,
-                            Id   = "Bearer"
+                            Id = "Bearer"
                         }
                     },
                     Array.Empty<string>()
@@ -81,50 +85,31 @@ public class Program
             });
         });
 
-
-        builder.Services.AddCors(options =>
-        {
-            options.AddPolicy("AllowAll", policy =>
-                policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-        });
-
-
         var app = builder.Build();
 
-
+        // Configure the HTTP request pipeline
         app.UseGlobalExceptionHandler();
 
-        //if (app.Environment.IsDevelopment())
-        //{
-        //    app.UseSwagger();
-        //    app.UseSwaggerUI();// c =>
-        //    //{
-        //    //    c.SwaggerEndpoint("/swagger/v1/swagger.json", "UniCare API v1");
-        //    //    c.RoutePrefix = string.Empty;
-        //    //});
-        //}
+        // Enable Swagger in all environments (or conditionally)
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
             c.SwaggerEndpoint("/swagger/v1/swagger.json", "UniCare API v1");
-            c.RoutePrefix = "swagger"; // Explicitly set route prefix
-
-            // Optional: Customize for production
+            c.RoutePrefix = "swagger";
             c.DocumentTitle = "UniCare API Documentation";
             c.DisplayRequestDuration();
         });
 
         app.UseHttpsRedirection();
-
         app.UseStaticFiles();
 
-        app.UseCors("AllowAll");
+        // Apply CORS policy
+        app.UseCors("AllowAll"); // Use "AllowSpecific" for production
 
         app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();
-
 
         app.Run();
     }

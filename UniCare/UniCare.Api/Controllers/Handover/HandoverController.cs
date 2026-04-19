@@ -72,8 +72,8 @@ namespace UniCare.Api.Controllers.Handover
             var result = await _sender.Send(query, ct);
 
             return result.IsSuccess
-                ? Ok(result.Value)
-                : NotFound(new { error = result.Error });
+                ? Ok(result.Data)
+                : NotFound(new { error = result.ErrorMessage });
         }
     }
 
