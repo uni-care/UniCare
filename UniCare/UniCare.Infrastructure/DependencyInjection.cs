@@ -8,7 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using UniCare.Domain.Aggregates.TransactionAggregate;
 using UniCare.Domain.Aggregates.TransactionHandover;
+using UniCare.Domain.Repositories;
 using UniCare.Infrastructure.Persistence;
+using UniCare.Infrastructure.Persistence.Repositories;
 using UniCare.Infrastructure.Repositories;
 
 namespace UniCare.Infrastructure
@@ -21,7 +23,7 @@ namespace UniCare.Infrastructure
         {
             services.AddDbContext<UniCareDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
-
+            services.AddScoped<IItemRepository, ItemRepository>();
             services.AddScoped<ITransactionHandoverRepository, TransactionHandoverRepository>();
             services.AddScoped<ITransactionRepository, TransactionRepository>();
             services.AddSingleton<IPinGeneratorService, PinGeneratorService>();

@@ -19,7 +19,15 @@ namespace UniCare.Api
             // Clean Architecture layers
             builder.Services.AddApplication();                          // MediatR + Validators + Pipeline
             builder.Services.AddInfrastructure(builder.Configuration); // EF Core + Repos + Domain Services
-
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -27,7 +35,7 @@ namespace UniCare.Api
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseCors("AllowAll");
             app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
