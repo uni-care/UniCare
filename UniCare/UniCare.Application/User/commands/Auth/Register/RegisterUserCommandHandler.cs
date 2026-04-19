@@ -10,6 +10,7 @@ using UniCare.Application.Interfaces;
 using UniCare.Application.User.DTOs.Auth;
 using UniCare.Domain.Aggregates.UserAggregates;
 using UniCare.Domain.Enums;
+using UniCare.Application.Interfaces;
 
 namespace UniCare.Application.User.commands.Auth.Register
 {

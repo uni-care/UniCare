@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UniCare.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using UniCare.Infrastructure.Persistence;
 namespace UniCare.Infrastructure.Migrations
 {
     [DbContext(typeof(UniCareDbContext))]
-    partial class UniCareDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260419134640_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
