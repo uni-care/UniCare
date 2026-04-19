@@ -17,7 +17,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace UniCare.Infrastructure.Persistence
 {
-    public class UniCareDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>,
+    public class UniCareDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>,
         IApplicationDbContext
     {
         public UniCareDbContext(DbContextOptions<UniCareDbContext> options) : base(options) { }
@@ -95,7 +95,7 @@ namespace UniCare.Infrastructure.Persistence
             {
                 entity.HasKey(e => e.Id);
 
-                entity.Property(e => e.Name)
+                entity.Property(e => e.Title)
                       .IsRequired()
                       .HasMaxLength(200);
 
@@ -192,7 +192,7 @@ namespace UniCare.Infrastructure.Persistence
             });
 
             // ── ApplicationUser ───────────────────────────────────────────────
-            builder.Entity<ApplicationUser>(entity =>
+            builder.Entity<User>(entity =>
             {
                 entity.Property(e => e.FullName)
                       .IsRequired()
@@ -236,14 +236,14 @@ namespace UniCare.Infrastructure.Persistence
 
             // Transaction → ApplicationUser (Owner)
             builder.Entity<Transaction>()
-                .HasOne<ApplicationUser>()
+                .HasOne<User>()
                 .WithMany()
                 .HasForeignKey(t => t.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Transaction → ApplicationUser (Requester)
             builder.Entity<Transaction>()
-                .HasOne<ApplicationUser>()
+                .HasOne<User>()
                 .WithMany()
                 .HasForeignKey(t => t.RequesterId)
                 .OnDelete(DeleteBehavior.Restrict);
@@ -263,7 +263,7 @@ namespace UniCare.Infrastructure.Persistence
                 .OnDelete(DeleteBehavior.Cascade);
 
             // ── Identity Table Names ──────────────────────────────────────────
-            builder.Entity<ApplicationUser>().ToTable("UniCare_Users");
+            builder.Entity<User>().ToTable("UniCare_Users");
             builder.Entity<IdentityRole<Guid>>().ToTable("UniCare_Roles");
             builder.Entity<IdentityUserRole<Guid>>().ToTable("UniCare_UserRoles");
             builder.Entity<IdentityUserClaim<Guid>>().ToTable("UniCare_UserClaims");
