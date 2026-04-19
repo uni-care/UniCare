@@ -7,7 +7,7 @@
 ## 🎨 UI/UX Design
 
 You can explore the complete user interface and user experience design for the UNI Care project on Figma:
-🔗 **[View UNI Care Design on Figma](https://www.figma.com/design/hFdFDRsoLaOpLgjDULQLMO/UniCare?node-id=0-1&p=f&t=CtIQ6bdf83AKwGJp-0)**
+🔗 **[View UNI Care Design on Figma](https://www.figma.com/design/5ms3obgTr0GNbvPL5DOiwh/UNI-Care?node-id=0-1&p=f&t=BpAcm7dVcflnAzoq-0)**
 
 ---
 
@@ -74,7 +74,7 @@ To ensure physical delivery and item security, the system uses a dual-verificati
 
 ## 🛠️ Technical Stack
 
-- **Frontend:** Next js (TypeScript, Tailwind CSS)
+- **Frontend:** React
 - **Backend:** .NET Core (C#)
 - **Database:** SQL Server
 - **AI/OCR:** Computer Vision
