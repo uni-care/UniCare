@@ -1,12 +1,12 @@
-﻿using MediatR;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UniCare.Application.Common.Behaviors;
 using FluentValidation;
+using UniCare.Application.Common.Behaviors;
+using MediatR;
 
 
 namespace UniCare.Application
@@ -17,16 +17,18 @@ namespace UniCare.Application
         {
             var assembly = typeof(DependencyInjection).Assembly;
 
-            // Register all IRequestHandlers in this assembly automatically
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
+            services.AddMediatR(cfg =>
+            {
+                cfg.RegisterServicesFromAssembly(assembly);
+                // Register the validation pipeline behavior
+                cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+            });
 
-            // Register all FluentValidation validators in this assembly
+            // Register all FluentValidation validators from this assembly
             services.AddValidatorsFromAssembly(assembly);
-
-            // Plug in the validation pipeline — runs before every handler
-            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
             return services;
         }
     }
+
 }
