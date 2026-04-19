@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UniCare.Application.Chat.Commands.SendMessage
+namespace UniCare.Application.Chats.Commands.SendMessage
 {
     public sealed class SendMessageCommandValidator : AbstractValidator<SendMessageCommand>
     {

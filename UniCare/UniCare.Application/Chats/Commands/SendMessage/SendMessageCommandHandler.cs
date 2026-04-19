@@ -7,7 +7,7 @@ using UniCare.Application.Common;
 using UniCare.Application.Common.cqrs;
 using UniCare.Domain.Aggregates.ChatAggregate;
 
-namespace UniCare.Application.Chat.Commands.SendMessage
+namespace UniCare.Application.Chats.Commands.SendMessage
 {
     public sealed class SendMessageCommandHandler
         : ICommandHandler<SendMessageCommand, Result<SendMessageResult>>
