@@ -16,7 +16,7 @@ namespace UniCare.Domain.Aggregates.ItemAggregates
         public int Quantity { get; private set; }
         public bool IsAvailable { get; private set; }
         public virtual ApplicationUser Owner { get; set; } = null!;
-        public object OwnerId { get; set; }
+        public virtual Guid OwnerId { get; set; }
 
         private Item() { } // EF Core
 
