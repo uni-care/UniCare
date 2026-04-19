@@ -8,6 +8,9 @@ using UniCare.Application.Item.DTOs;
 using UniCare.Application.Item.Queries;
 using UniCare.Application.Item.Queries.GetAllItems;
 using UniCare.Application.Item.Queries.GetItemById;
+using Microsoft.AspNetCore.Authorization;
+using UniCare.Application.Item.Commands;
+using UniCare.Api.Models;
 
 namespace UniCare.API.Controllers;
 
