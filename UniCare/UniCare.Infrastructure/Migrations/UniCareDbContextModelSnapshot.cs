@@ -22,12 +22,35 @@ namespace UniCare.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("UniCare.Domain.Aggregates.TransactionAggregate.Transaction", b =>
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal>("AgreedPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("RentalReturnDue")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("RequesterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Type")
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -187,6 +210,14 @@ namespace UniCare.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("OwnerId", "Status");
+
+                    b.HasIndex("RequesterId", "Status");
+
+                    b.ToTable("Transactions");
+                });
+
+            modelBuilder.Entity("UniCare.Domain.Aggregates.TransactionHandover.TransactionHandover", b =>
                     b.HasIndex("Name");
 
                     b.ToTable("Items", (string)null);
@@ -198,6 +229,35 @@ namespace UniCare.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("GeneratedForUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Pin")
+                        .IsRequired()
+                        .HasMaxLength(6)
+                        .HasColumnType("nvarchar(6)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<Guid>("TransactionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("VerifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("VerifiedByUserId")
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
@@ -349,6 +409,9 @@ namespace UniCare.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TransactionId", "Type", "Status");
+
+                    b.ToTable("TransactionHandovers");
                     b.HasIndex("UserId")
                         .IsUnique();
 
