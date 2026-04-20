@@ -38,52 +38,67 @@ namespace UniCare.Infrastructure.services.Ocr
             Stream fileStream,
             string fileName)
         {
-            _logger.LogInformation(
-                "[RealOcrService] Sending '{FileName}' to OCR endpoint {ApiUrl}",
-                fileName, _settings.ApiUrl);
 
-            using var content = new MultipartFormDataContent();
+            return await ExtractStudentDataAsync(
+                fileStream, fileName,
+                userId: string.Empty,
+                docType: "student_id");
+        }
+
+
+        public async Task<OcrExtractedDataDto> ExtractStudentDataAsync(
+            Stream fileStream,
+            string fileName,
+            string userId,
+            string docType)
+        {
+            _logger.LogInformation(
+                "[RealOcrService] Sending '{FileName}' (userId={UserId}, docType={DocType}) to {ApiUrl}",
+                fileName, userId, docType, _settings.ApiUrl);
+
+            using var form = new MultipartFormDataContent();
+
+            form.Add(new StringContent(userId), "user_id");
+
+            form.Add(new StringContent(docType), "doc_type");
 
             var fileBytes = await ReadAllBytesAsync(fileStream);
             var fileContent = new ByteArrayContent(fileBytes);
             fileContent.Headers.ContentType =
                 new MediaTypeHeaderValue(ResolveMimeType(fileName));
-
-            content.Add(fileContent, "file", fileName);
+            //form.Add(fileContent, "file", fileName);
 
             HttpResponseMessage httpResponse;
             string rawJson = string.Empty;
 
             try
             {
-                httpResponse = await _httpClient.PostAsync(_settings.ApiUrl, content);
+                httpResponse = await _httpClient.PostAsync(_settings.ApiUrl, form);
                 rawJson = await httpResponse.Content.ReadAsStringAsync();
 
                 _logger.LogDebug(
-                    "[RealOcrService] OCR responded HTTP {StatusCode} for '{FileName}'",
+                    "[RealOcrService] HTTP {StatusCode} for '{FileName}'",
                     (int)httpResponse.StatusCode, fileName);
             }
             catch (HttpRequestException ex)
             {
                 _logger.LogError(ex,
                     "[RealOcrService] Network error for '{FileName}'", fileName);
-                return EmptyResult(rawJson: null);
+                return PendingResult(rawJson: null);
             }
             catch (TaskCanceledException ex)
             {
                 _logger.LogError(ex,
-                    "[RealOcrService] Request timed out for '{FileName}'", fileName);
-                return EmptyResult(rawJson: null);
+                    "[RealOcrService] Timeout for '{FileName}'", fileName);
+                return PendingResult(rawJson: null);
             }
 
-            // Non-2xx  →  save raw body for audit, return Pending so the
-            // handler records the submission without auto-rejecting the user.
             if (!httpResponse.IsSuccessStatusCode)
             {
                 _logger.LogWarning(
-                    "[RealOcrService] Non-success HTTP {StatusCode} for '{FileName}'. Body: {Body}",
+                    "[RealOcrService] HTTP {StatusCode} for '{FileName}'. Body: {Body}",
                     (int)httpResponse.StatusCode, fileName, rawJson);
-                return EmptyResult(rawJson);
+                return PendingResult(rawJson);
             }
 
             OcrApiResponse? apiResponse;
@@ -96,47 +111,40 @@ namespace UniCare.Infrastructure.services.Ocr
                 _logger.LogError(ex,
                     "[RealOcrService] JSON parse failed for '{FileName}'. Raw: {Raw}",
                     fileName, rawJson);
-                return EmptyResult(rawJson);
+                return PendingResult(rawJson);
             }
 
-            // API-level failure 
-            if (apiResponse is null || !apiResponse.Success || apiResponse.Data is null)
+            if (apiResponse is null)
             {
                 _logger.LogWarning(
-                    "[RealOcrService] success=false or empty data for '{FileName}'. Error: {Err}",
-                    fileName, apiResponse?.Error ?? "unknown");
-                return EmptyResult(rawJson);
+                    "[RealOcrService] Null response body for '{FileName}'", fileName);
+                return PendingResult(rawJson);
             }
 
-            var verdict = apiResponse.Data.is_approved;
+            var verdict = apiResponse.IsApproved ? OcrVerdict.Verified : OcrVerdict.Rejected;
 
             var dto = new OcrExtractedDataDto
             {
-                ExtractedUniversity = Normalise(apiResponse.Data.University),
-                ExtractedFaculty = Normalise(apiResponse.Data.Faculty),
-                is_approved = apiResponse.Data.is_approved,
+                ExtractedUniversity = Normalise(apiResponse.University),
+                ExtractedFaculty = Normalise(apiResponse.Faculty),
+                Verdict = verdict,
                 RawApiResponse = rawJson
             };
 
             _logger.LogInformation(
-                "[RealOcrService] OCR done for '{FileName}'. " +
-                "is_approved={is_approved} Name={Name} Uni={Uni} Faculty={Fac} Expiry={Exp}",
-                fileName, dto.is_approved,
-                dto.ExtractedUniversity, dto.ExtractedFaculty);
+                "[RealOcrService] Done for '{FileName}'. " +
+                "Verdict={Verdict} University='{Uni}' Faculty='{Fac}'",
+                fileName, dto.Verdict, dto.ExtractedUniversity, dto.ExtractedFaculty);
 
             return dto;
         }
 
-   
-
         private static async Task<byte[]> ReadAllBytesAsync(Stream stream)
         {
-            if (stream is MemoryStream ms)
-                return ms.ToArray();
-
-            using var buffer = new MemoryStream();
-            await stream.CopyToAsync(buffer);
-            return buffer.ToArray();
+            if (stream is MemoryStream ms) return ms.ToArray();
+            using var buf = new MemoryStream();
+            await stream.CopyToAsync(buf);
+            return buf.ToArray();
         }
 
         private static string ResolveMimeType(string fileName) =>
@@ -151,26 +159,9 @@ namespace UniCare.Infrastructure.services.Ocr
 
         private static string? Normalise(string? value) =>
             string.IsNullOrWhiteSpace(value) ? null : value.Trim();
-
-        private static DateTime? ParseDate(string? raw)
+        private static OcrExtractedDataDto PendingResult(string? rawJson) => new()
         {
-            if (string.IsNullOrWhiteSpace(raw)) return null;
-
-            string[] formats = ["yyyy-MM-dd", "MM/dd/yyyy", "dd/MM/yyyy", "dd-MM-yyyy"];
-
-            if (DateTime.TryParseExact(raw, formats,
-                    System.Globalization.CultureInfo.InvariantCulture,
-                    System.Globalization.DateTimeStyles.None, out var parsed))
-                return DateTime.SpecifyKind(parsed, DateTimeKind.Utc);
-
-            if (DateTime.TryParse(raw, out var fallback))
-                return DateTime.SpecifyKind(fallback.Date, DateTimeKind.Utc);
-
-            return null;
-        }
-        private static OcrExtractedDataDto EmptyResult(string? rawJson) => new()
-        {
-            is_approved = null,  // safe default on failure
+            Verdict = OcrVerdict.Pending,
             RawApiResponse = rawJson
         };
     }

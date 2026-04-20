@@ -48,12 +48,18 @@ namespace UniCare.Application.User.commands.UploadID
                 request.FileContent, request.FileName, folder);
 
             using var stream = new MemoryStream(request.FileContent);
-            var ocrData = await _ocrService.ExtractStudentDataAsync(stream, request.FileName);
+
+            var ocrData = await _ocrService.ExtractStudentDataAsync(
+                fileStream: stream,
+                fileName: request.FileName,
+                userId: request.UserId.ToString(),
+                docType: MapDocType(request.DocumentType));
+
+      
+            var (newStatus, isVerified, badgeGrantedAt) =
+                ResolveVerificationOutcome(ocrData.Verdict);
 
           
-            var (newStatus, isVerified, badgeGrantedAt, reviewNotes) =
-                ResolveVerificationOutcome(ocrData);
-
             var verification = await _dbContext.StudentVerifications
                 .FirstOrDefaultAsync(sv => sv.UserId == request.UserId, cancellationToken);
 
@@ -66,24 +72,31 @@ namespace UniCare.Application.User.commands.UploadID
             verification.DocumentType = request.DocumentType;
             verification.DocumentUrl = documentUrl;
 
+            verification.OcrExtractedName = null;   
             verification.OcrExtractedUniversity = ocrData.ExtractedUniversity;
             verification.OcrExtractedFaculty = ocrData.ExtractedFaculty;
+            verification.OcrExpiryDate = null;  
 
             verification.OcrRawResponse = ocrData.RawApiResponse;
 
             verification.SubmittedAt = DateTime.UtcNow;
-            verification.ReviewNotes = reviewNotes;   
-
             verification.ReviewedAt = newStatus is VerificationStatus.Verified
-                                                 or VerificationStatus.Rejected
-                                   ? DateTime.UtcNow
-                                   : null;
+                                                  or VerificationStatus.Rejected
+                                    ? DateTime.UtcNow
+                                    : null;
+            verification.ReviewNotes = null;
 
             user.VerificationStatus = newStatus;
             user.IsVerifiedStudent = isVerified;
             user.VerificationBadgeGrantedAt = badgeGrantedAt;
-            user.UpdatedAt = DateTime.UtcNow;
 
+            if (newStatus == VerificationStatus.Verified)
+            {
+                user.UniversityName = ocrData.ExtractedUniversity ?? user.UniversityName;
+                user.FacultyName = ocrData.ExtractedFaculty ?? user.FacultyName;
+            }
+
+            user.UpdatedAt = DateTime.UtcNow;
             await _userManager.UpdateAsync(user);
 
             await _dbContext.SaveChangesAsync(cancellationToken);
@@ -97,34 +110,30 @@ namespace UniCare.Application.User.commands.UploadID
             });
         }
 
-       
         private static (
             VerificationStatus status,
             bool isVerifiedStudent,
-            DateTime? badgeGrantedAt,
-            string? reviewNotes)
-        ResolveVerificationOutcome(OcrExtractedDataDto ocrData)
+            DateTime? badgeGrantedAt)
+        ResolveVerificationOutcome(OcrVerdict verdict) => verdict switch
         {
-            return ocrData.is_approved switch
+            OcrVerdict.Verified => (
+                VerificationStatus.Verified, true, DateTime.UtcNow),
+
+            OcrVerdict.Rejected => (
+                VerificationStatus.Rejected, false, null),
+
+            _ => (VerificationStatus.Pending, false, null)
+        };
+
+
+        private static string MapDocType(UniCare.Domain.Enums.DocumentType docType) =>
+            docType switch
             {
-                true => (
-                    status: VerificationStatus.Verified,
-                    isVerifiedStudent: true,
-                    badgeGrantedAt: DateTime.UtcNow,
-                    reviewNotes: null),
-
-                false => (
-                    status: VerificationStatus.Rejected,
-                    isVerifiedStudent: false,
-                    badgeGrantedAt: null,
-                    reviewNotes: null),   
-
-                _ => (
-                    status: VerificationStatus.Pending,
-                    isVerifiedStudent: false,
-                    badgeGrantedAt: null,
-                    reviewNotes: null)
+                UniCare.Domain.Enums.DocumentType.StudentId => "student_id",
+                UniCare.Domain.Enums.DocumentType.NominationCard => "nomination_card",
+                UniCare.Domain.Enums.DocumentType.NationalId => "national_id",
+                UniCare.Domain.Enums.DocumentType.GraduationCertificate => "graduation_certificate",
+                _ => "student_id"
             };
-        }
     }
 }

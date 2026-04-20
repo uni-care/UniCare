@@ -10,8 +10,6 @@ using UniCare.Infrastructure.Persistence;
 using UniCare.Infrastructure.Repositories;
 using UniCare.Infrastructure.Services;
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,11 +18,8 @@ using System.Threading.Tasks;
 using UniCare.Application.Interfaces;
 using UniCare.Domain.Aggregates.UserAggregates;
 using UniCare.Domain.Interfaces;
-using UniCare.Infrastructure.Services;
 using UniCare.Infrastructure.Settings;
-using UniCare.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using UniCare.Infrastructure.services.Ocr;
 
@@ -45,6 +40,16 @@ namespace UniCare.Infrastructure
 
             services.AddScoped<IApplicationDbContext>(provider =>
                 provider.GetRequiredService<UniCareDbContext>());
+            services.AddCors(options =>
+            {
+                options.AddPolicy("SignalRCors", policy =>
+                {
+                    policy.WithOrigins("http://localhost:3000", "https://uni-care-front.vercel.app/") // Add your frontend URLs
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials(); 
+                });
+            });
 
             services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
             {
@@ -86,6 +91,22 @@ namespace UniCare.Infrastructure
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ClockSkew = TimeSpan.Zero
                 };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            path.StartsWithSegments("/hubs/chat"))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
             var ocrSection = configuration.GetSection(OcrSettings.SectionName);
@@ -113,6 +134,8 @@ namespace UniCare.Infrastructure
 
         public static WebApplication UseInfrastructure(this WebApplication app)
         {
+            app.UseCors("SignalRCors");
+
             app.MapHub<ChatHub>("/hubs/chat");
             return app;
         }
