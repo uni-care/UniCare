@@ -42,10 +42,18 @@ namespace UniCare.Application.User.commands.UploadID
             var user = await _userManager.FindByIdAsync(request.UserId.ToString());
             if (user is null)
                 return Result<UploadIdResponseDto>.NotFound("User not found.");
+
             var folder = $"verifications/{request.UserId}";
-            var documentUrl = await _fileStorage.SaveFileAsync(request.FileContent, request.FileName, folder);
+            var documentUrl = await _fileStorage.SaveFileAsync(
+                request.FileContent, request.FileName, folder);
+
             using var stream = new MemoryStream(request.FileContent);
             var ocrData = await _ocrService.ExtractStudentDataAsync(stream, request.FileName);
+
+          
+            var (newStatus, isVerified, badgeGrantedAt, reviewNotes) =
+                ResolveVerificationOutcome(ocrData);
+
             var verification = await _dbContext.StudentVerifications
                 .FirstOrDefaultAsync(sv => sv.UserId == request.UserId, cancellationToken);
 
@@ -57,15 +65,25 @@ namespace UniCare.Application.User.commands.UploadID
 
             verification.DocumentType = request.DocumentType;
             verification.DocumentUrl = documentUrl;
-            verification.OcrExtractedName = ocrData.ExtractedName;
+
             verification.OcrExtractedUniversity = ocrData.ExtractedUniversity;
             verification.OcrExtractedFaculty = ocrData.ExtractedFaculty;
-            verification.OcrExpiryDate = ocrData.ExpiryDate;
+
+            verification.OcrRawResponse = ocrData.RawApiResponse;
+
             verification.SubmittedAt = DateTime.UtcNow;
-            verification.ReviewedAt = null;
-            verification.ReviewNotes = null;
-            user.VerificationStatus = VerificationStatus.Pending;
+            verification.ReviewNotes = reviewNotes;   
+
+            verification.ReviewedAt = newStatus is VerificationStatus.Verified
+                                                 or VerificationStatus.Rejected
+                                   ? DateTime.UtcNow
+                                   : null;
+
+            user.VerificationStatus = newStatus;
+            user.IsVerifiedStudent = isVerified;
+            user.VerificationBadgeGrantedAt = badgeGrantedAt;
             user.UpdatedAt = DateTime.UtcNow;
+
             await _userManager.UpdateAsync(user);
 
             await _dbContext.SaveChangesAsync(cancellationToken);
@@ -73,10 +91,40 @@ namespace UniCare.Application.User.commands.UploadID
             return Result<UploadIdResponseDto>.Created(new UploadIdResponseDto
             {
                 VerificationId = verification.Id,
-                Status = VerificationStatus.Pending,
+                Status = newStatus,
                 SubmittedAt = verification.SubmittedAt,
                 ExtractedData = ocrData
             });
+        }
+
+       
+        private static (
+            VerificationStatus status,
+            bool isVerifiedStudent,
+            DateTime? badgeGrantedAt,
+            string? reviewNotes)
+        ResolveVerificationOutcome(OcrExtractedDataDto ocrData)
+        {
+            return ocrData.is_approved switch
+            {
+                true => (
+                    status: VerificationStatus.Verified,
+                    isVerifiedStudent: true,
+                    badgeGrantedAt: DateTime.UtcNow,
+                    reviewNotes: null),
+
+                false => (
+                    status: VerificationStatus.Rejected,
+                    isVerifiedStudent: false,
+                    badgeGrantedAt: null,
+                    reviewNotes: null),   
+
+                _ => (
+                    status: VerificationStatus.Pending,
+                    isVerifiedStudent: false,
+                    badgeGrantedAt: null,
+                    reviewNotes: null)
+            };
         }
     }
 }

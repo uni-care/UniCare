@@ -26,6 +26,7 @@ using UniCare.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using UniCare.Infrastructure.services.Ocr;
 
 
 
@@ -47,14 +48,12 @@ namespace UniCare.Infrastructure
 
             services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
             {
-                // Password policy
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
                 options.Password.RequireUppercase = true;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredLength = 8;
 
-                // Lockout policy
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
                 options.Lockout.MaxFailedAccessAttempts = 5;
 
@@ -85,23 +84,26 @@ namespace UniCare.Infrastructure
                     ValidIssuer = jwtSettings.Issuer,
                     ValidAudience = jwtSettings.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ClockSkew = TimeSpan.Zero // No tolerance on expiry
+                    ClockSkew = TimeSpan.Zero
                 };
             });
 
+            var ocrSection = configuration.GetSection(OcrSettings.SectionName);
+            services.Configure<OcrSettings>(ocrSection);
 
+            var ocrSettings = ocrSection.Get<OcrSettings>() ?? new OcrSettings();
 
+            services.AddHttpClient<IOcrService, RealOcrService>();
+      
             services.AddScoped<ITransactionHandoverRepository, TransactionHandoverRepository>();
             services.AddScoped<ITransactionRepository, TransactionRepository>();
             services.AddScoped<IChatRepository, ChatRepository>();
 
             services.AddSingleton<IPinGeneratorService, PinGeneratorService>();
-            // ── Custom Services ───────────────────────────────────────────────────
+
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<ISignInService, SignInService>();
-            services.AddScoped<IOcrService, MockOcrService>();   // Swap for real implementation
             services.AddScoped<IFileStorageService, FileStorageService>();
-
             services.AddScoped<IChatNotificationService, SignalRChatNotificationService>();
 
             services.AddSignalR();

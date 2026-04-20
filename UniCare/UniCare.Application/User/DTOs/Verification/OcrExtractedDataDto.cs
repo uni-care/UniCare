@@ -6,12 +6,17 @@ using System.Threading.Tasks;
 
 namespace UniCare.Application.User.DTOs.Verification
 {
-    public class OcrExtractedDataDto
+    public enum OcrVerdict
     {
-        public string? ExtractedName { get; set; }
-        public string? ExtractedUniversity { get; set; }
-        public string? ExtractedFaculty { get; set; }
-        public DateTime? ExpiryDate { get; set; }
+        Verified = 1,
+        Rejected = 2
     }
 
+    public class OcrExtractedDataDto
+    {
+        public string? ExtractedUniversity { get; set; }
+        public string? ExtractedFaculty { get; set; }
+        public bool? is_approved { get; set; }
+        public string? RawApiResponse { get; set; }
+    }
 }
