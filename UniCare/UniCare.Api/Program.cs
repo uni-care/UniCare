@@ -24,10 +24,18 @@ public class Program
 
         builder.Services.AddCors(options =>
         {
-            options.AddPolicy("AllowAll", policy =>
-                policy.AllowAnyOrigin()
+            options.AddPolicy("MyCorsPolicy", policy =>
+            {
+                policy.WithOrigins(
+                        "https://uni-care-front.vercel.app/",
+                        "https://localhost:3000",          
+                        "http://localhost:3000"             
+                      )
+                      .SetIsOriginAllowedToAllowWildcardSubdomains()
                       .AllowAnyMethod()
-                      .AllowAnyHeader());
+                      .AllowAnyHeader()
+                      .AllowCredentials();
+            });
         });
 
         builder.Services.AddEndpointsApiExplorer();
