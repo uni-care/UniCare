@@ -15,32 +15,21 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container
         builder.Services.AddControllers();
 
-        // Register application and infrastructure services (ONCE)
         builder.Services.AddApplication();
         builder.Services.AddInfrastructure(builder.Configuration);
 
         builder.Services.AddDirectoryBrowser();
 
-        // Add CORS (MUST be registered here, NOT inside Swagger configuration)
         builder.Services.AddCors(options =>
         {
             options.AddPolicy("AllowAll", policy =>
                 policy.AllowAnyOrigin()
                       .AllowAnyMethod()
                       .AllowAnyHeader());
-
-            // Alternative: More secure policy for production with credentials
-            options.AddPolicy("AllowSpecific", policy =>
-                policy.WithOrigins("http://localhost:3000", "https://yourdomain.com")
-                      .AllowAnyMethod()
-                      .AllowAnyHeader()
-                      .AllowCredentials());
         });
 
-        // Add Swagger
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(options =>
         {
@@ -52,13 +41,11 @@ public class Program
                 Contact = new OpenApiContact { Name = "UniCare Team" }
             });
 
-            // Include XML comments if they exist
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
             if (File.Exists(xmlPath))
                 options.IncludeXmlComments(xmlPath);
 
-            // Add JWT authentication to Swagger
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Name = "Authorization",
@@ -84,13 +71,12 @@ public class Program
                 }
             });
         });
+     
 
         var app = builder.Build();
 
-        // Configure the HTTP request pipeline
         app.UseGlobalExceptionHandler();
 
-        // Enable Swagger in all environments (or conditionally)
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
@@ -103,8 +89,7 @@ public class Program
         app.UseHttpsRedirection();
         app.UseStaticFiles();
 
-        // Apply CORS policy
-        app.UseCors("AllowAll"); // Use "AllowSpecific" for production
+        app.UseCors("AllowAll"); 
 
         app.UseAuthentication();
         app.UseAuthorization();
