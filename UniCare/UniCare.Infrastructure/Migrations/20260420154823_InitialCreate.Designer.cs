@@ -12,7 +12,7 @@ using UniCare.Infrastructure.Persistence;
 namespace UniCare.Infrastructure.Migrations
 {
     [DbContext(typeof(UniCareDbContext))]
-    [Migration("20260420145453_InitialCreate")]
+    [Migration("20260420154823_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -486,10 +486,8 @@ namespace UniCare.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<string>("RegistrationMethod")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int>("RegistrationMethod")
+                        .HasColumnType("int");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -511,10 +509,8 @@ namespace UniCare.Infrastructure.Migrations
                     b.Property<DateTime?>("VerificationBadgeGrantedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("VerificationStatus")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int>("VerificationStatus")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

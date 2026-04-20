@@ -31,24 +31,6 @@ namespace UniCare.Infrastructure.Migrations
                 newName: "IX_Items_Title");
 
             migrationBuilder.AlterColumn<string>(
-                name: "VerificationStatus",
-                table: "UniCare_Users",
-                type: "nvarchar(50)",
-                maxLength: 50,
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "RegistrationMethod",
-                table: "UniCare_Users",
-                type: "nvarchar(50)",
-                maxLength: 50,
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int");
-
-            migrationBuilder.AlterColumn<string>(
                 name: "Price",
                 table: "Items",
                 type: "nvarchar(50)",
@@ -196,24 +178,6 @@ namespace UniCare.Infrastructure.Migrations
                 name: "IX_Items_Title",
                 table: "Items",
                 newName: "IX_Items_Name");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "VerificationStatus",
-                table: "UniCare_Users",
-                type: "int",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(50)",
-                oldMaxLength: 50);
-
-            migrationBuilder.AlterColumn<int>(
-                name: "RegistrationMethod",
-                table: "UniCare_Users",
-                type: "int",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(50)",
-                oldMaxLength: 50);
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "Price",

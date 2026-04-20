@@ -31,6 +31,14 @@ public class ItemsController : ControllerBase
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return Guid.Parse(userIdClaim!);
     }
+    [HttpGet]
+    [ProducesResponseType(typeof(List<ItemDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllItems(CancellationToken cancellationToken)
+    {
+        var query = new GetAllItemsQuery();
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(result);
+    }
 
     [HttpGet("{itemId:guid}")]
     [ProducesResponseType(typeof(ItemDto), StatusCodes.Status200OK)]
