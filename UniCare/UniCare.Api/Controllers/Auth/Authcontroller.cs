@@ -9,7 +9,7 @@ using UniCare.Application.User.commands.Auth.Register;
 using UniCare.Application.User.DTOs;
 using UniCare.Application.User.DTOs.Auth;
 
-namespace UniCare.Api.Controllers
+namespace UniCare.Api.Controllers.Auth
 {
     [ApiController]
     [Route("api/v1/auth")]

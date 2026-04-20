@@ -13,9 +13,9 @@ namespace UniCare.Application.User.commands.Auth.Logout
     public sealed class LogoutUserCommandHandler
       : ICommandHandler<LogoutUserCommand, Result<LogoutResult>>
     {
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<UniCare.Domain.Aggregates.UserAggregates.User> _userManager;
 
-        public LogoutUserCommandHandler(UserManager<ApplicationUser> userManager)
+        public LogoutUserCommandHandler(UserManager<UniCare.Domain.Aggregates.UserAggregates.User> userManager)
             => _userManager = userManager;
 
         public async Task<Result<LogoutResult>> Handle(

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UniCare.Domain.Aggregates.ItemAggregates;
+using UniCare.Domain.Enums;
 using UniCare.Domain.Repositories;
 
 namespace UniCare.Infrastructure.Persistence.Repositories
@@ -19,7 +20,7 @@ namespace UniCare.Infrastructure.Persistence.Repositories
         {
             return await _dbSet
                 .AsNoTracking()
-                .Where(i => i.IsAvailable)
+                .Where(i => i.Status == ItemStatus.Available)
                 .ToListAsync(cancellationToken);
         }
 
@@ -27,7 +28,7 @@ namespace UniCare.Infrastructure.Persistence.Repositories
         {
             return await _dbSet
                 .AsNoTracking()
-                .FirstOrDefaultAsync(i => i.Name == name, cancellationToken);
+                .FirstOrDefaultAsync(i => i.Title == name, cancellationToken);
         }
     }
 }

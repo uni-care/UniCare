@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.SignalR;
-using System.Reflection;
-using Microsoft.OpenApi.Models;
-using UniCare.Api.Middelware;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
+using UniCare.Api.Middelware;
 using UniCare.Application;
+using UniCare.Domain.Repositories;
 using UniCare.Infrastructure;
+using UniCare.Infrastructure.Persistence.Repositories;
 
 namespace UniCare.Api;
 
@@ -21,7 +23,7 @@ public class Program
         builder.Services.AddInfrastructure(builder.Configuration);
 
         builder.Services.AddDirectoryBrowser();
-
+        builder.Services.AddScoped<IItemRepository, ItemRepository>();
         builder.Services.AddCors(options =>
         {
             options.AddPolicy("AllowAll", policy =>
