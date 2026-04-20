@@ -13,7 +13,9 @@ namespace UniCare.Infrastructure.Persistence
     public class UniCareDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>,
         IApplicationDbContext
     {
-        public UniCareDbContext(DbContextOptions<UniCareDbContext> options) : base(options) { }
+        public UniCareDbContext(DbContextOptions<UniCareDbContext> options) : base(options) {
+           
+        }
 
         public DbSet<TransactionHandover> TransactionHandovers => Set<TransactionHandover>();
         public DbSet<Transaction> Transactions => Set<Transaction>();
@@ -22,9 +24,11 @@ namespace UniCare.Infrastructure.Persistence
         public DbSet<StudentVerification> StudentVerifications => Set<StudentVerification>();
         public DbSet<Item> Items { get; set; } = null!;
 
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder); // MUST be called first for Identity tables
+
 
             // ── TransactionHandover ───────────────────────────────────────────
             builder.Entity<TransactionHandover>(entity =>
@@ -201,12 +205,12 @@ namespace UniCare.Infrastructure.Persistence
                       .HasMaxLength(150);
 
                 entity.Property(e => e.RegistrationMethod)
-                      .IsRequired()
-                      .HasMaxLength(20);
+                .HasConversion<int>()  
+                .IsRequired();
 
                 entity.Property(e => e.VerificationStatus)
-                      .IsRequired()
-                      .HasMaxLength(30);
+                    .HasConversion<int>()  
+                    .IsRequired();
 
                 entity.Property(e => e.CreatedAt)
                       .IsRequired();
