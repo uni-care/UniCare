@@ -9,7 +9,17 @@ namespace UniCare.Application.Interfaces
 {
     public interface IOcrService
     {
-        Task<OcrExtractedDataDto> ExtractStudentDataAsync(Stream fileStream, string fileName);
+       
+        Task<UniCare.Application.User.DTOs.Verification.OcrExtractedDataDto>
+            ExtractStudentDataAsync(Stream fileStream, string fileName);
+
+  
+        Task<UniCare.Application.User.DTOs.Verification.OcrExtractedDataDto>
+            ExtractStudentDataAsync(
+                Stream fileStream,
+                string fileName,
+                string userId,
+                string docType);
     }
 
 }

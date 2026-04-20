@@ -10,7 +10,6 @@ using UniCare.Domain.Enums;
 
 namespace UniCare.Api.Controllers.Verification
 {
-
     [ApiController]
     [Route("api/v1/verify")]
     [Authorize]
@@ -19,25 +18,36 @@ namespace UniCare.Api.Controllers.Verification
     {
         private readonly IMediator _mediator;
 
+     
+        private const int MaxFileSizeBytes = 5 * 1024 * 1024; // 5 MB
+
         public VerifyController(IMediator mediator)
             => _mediator = mediator;
 
-
+        
         [HttpPost("upload-id")]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(typeof(ApiResponse<UploadIdResponseDto>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status422UnprocessableEntity)]
         public async Task<IActionResult> UploadId(
             IFormFile file,
-            [FromForm] DocumentType documentType = DocumentType.StudentId)
+            [FromForm] DocumentType documentType = DocumentType.StudentId,
+            CancellationToken cancellationToken = default)
         {
             if (file is null || file.Length == 0)
-                return BadRequest(ApiResponse<object>.Fail("No file was provided.", "NO_FILE"));
+                return BadRequest(ApiResponse<object>.Fail(
+                    "No file was provided.", "NO_FILE"));
+
+            if (file.Length > MaxFileSizeBytes)
+                return BadRequest(ApiResponse<object>.Fail(
+                    "File size must not exceed 5 MB.", "FILE_TOO_LARGE"));
 
             using var ms = new MemoryStream();
-            await file.CopyToAsync(ms);
+            await file.CopyToAsync(ms, cancellationToken);
+
 
             var command = new UploadIdCommand
             {
@@ -48,18 +58,18 @@ namespace UniCare.Api.Controllers.Verification
                 DocumentType = documentType
             };
 
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command, cancellationToken);
             return ToActionResult(result, StatusCodes.Status201Created);
         }
-
 
         [HttpGet("status")]
         [ProducesResponseType(typeof(ApiResponse<VerificationStatusDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> GetStatus()
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetStatus(CancellationToken cancellationToken = default)
         {
             var query = new GetVerificationStatusQuery { UserId = GetCurrentUserId() };
-            var result = await _mediator.Send(query);
+            var result = await _mediator.Send(query, cancellationToken);
             return ToActionResult(result);
         }
 
@@ -76,10 +86,10 @@ namespace UniCare.Api.Controllers.Verification
             {
                 401 => Unauthorized(ApiResponse<T>.FromResult(result)),
                 404 => NotFound(ApiResponse<T>.FromResult(result)),
+                409 => Conflict(ApiResponse<T>.FromResult(result)),
                 422 => UnprocessableEntity(ApiResponse<T>.FromResult(result)),
                 _ => BadRequest(ApiResponse<T>.FromResult(result))
             };
         }
     }
-
 }
