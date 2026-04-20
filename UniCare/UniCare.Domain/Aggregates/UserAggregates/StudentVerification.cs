@@ -21,5 +21,5 @@ public class StudentVerification
     public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
     public DateTime? ReviewedAt { get; set; }
     public string? ReviewNotes { get; set; }
-    public ApplicationUser User { get; set; } = null!;
+    public User User { get; set; } = null!;
 }

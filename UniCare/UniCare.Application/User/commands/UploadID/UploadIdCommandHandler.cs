@@ -19,13 +19,13 @@ namespace UniCare.Application.User.commands.UploadID
     public class UploadIdCommandHandler : IRequestHandler<UploadIdCommand, Result<UploadIdResponseDto>>
     {
         private readonly IApplicationDbContext _dbContext;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<Domain.Aggregates.UserAggregates.User> _userManager;
         private readonly IOcrService _ocrService;
         private readonly IFileStorageService _fileStorage;
 
         public UploadIdCommandHandler(
             IApplicationDbContext dbContext,
-            UserManager<ApplicationUser> userManager,
+            UserManager<Domain.Aggregates.UserAggregates.User> userManager,
             IOcrService ocrService,
             IFileStorageService fileStorage)
         {

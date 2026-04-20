@@ -14,9 +14,9 @@ namespace UniCare.Application.User.Queries.GetCurrentProfile
     public class GetCurrentProfileQueryHandler
     : IRequestHandler<GetCurrentProfileQuery, Result<UserProfileDto>>
     {
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<Domain.Aggregates.UserAggregates.User> _userManager;
 
-        public GetCurrentProfileQueryHandler(UserManager<ApplicationUser> userManager)
+        public GetCurrentProfileQueryHandler(UserManager<Domain.Aggregates.UserAggregates.User> userManager)
             => _userManager = userManager;
 
         public async Task<Result<UserProfileDto>> Handle(

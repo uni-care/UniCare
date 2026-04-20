@@ -8,7 +8,7 @@ using UniCare.Application.User.DTOs.Verification;
 using UniCare.Application.User.Queries.GetVerificationStatus;
 using UniCare.Domain.Enums;
 
-namespace UniCare.Api.Controllers
+namespace UniCare.Api.Controllers.Verification
 {
     [ApiController]
     [Route("api/v1/verify")]

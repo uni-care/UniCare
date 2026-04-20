@@ -11,12 +11,12 @@ namespace UniCare.Infrastructure.Services
 {
     public class SignInService : ISignInService
     {
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly SignInManager<User> _signInManager;
 
-        public SignInService(SignInManager<ApplicationUser> signInManager)
+        public SignInService(SignInManager<User> signInManager)
             => _signInManager = signInManager;
 
-        public async Task<SignInServiceResult> CheckPasswordSignInAsync(ApplicationUser user, string password)
+        public async Task<SignInServiceResult> CheckPasswordSignInAsync(User user, string password)
         {
             var result = await _signInManager.CheckPasswordSignInAsync(
                 user, password, lockoutOnFailure: true);

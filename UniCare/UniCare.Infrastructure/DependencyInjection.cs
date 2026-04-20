@@ -1,6 +1,13 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.DependencyInjection;
 using UniCare.Domain.Aggregates.ChatAggregate;
 using UniCare.Domain.Aggregates.TransactionAggregate;
@@ -16,6 +23,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UniCare.Application.Interfaces;
+using UniCare.Domain.Aggregates.ChatAggregate;
+using UniCare.Domain.Aggregates.TransactionAggregate;
+using UniCare.Domain.Aggregates.TransactionHandoverAggregate;
 using UniCare.Domain.Aggregates.UserAggregates;
 using UniCare.Domain.Interfaces;
 using UniCare.Infrastructure.Settings;
@@ -40,6 +50,11 @@ namespace UniCare.Infrastructure
 
             services.AddScoped<IApplicationDbContext>(provider =>
                 provider.GetRequiredService<UniCareDbContext>());
+            services.AddHttpClient<IAiRecommendationService, AiRecommendationService>(client => {
+                client.BaseAddress = new Uri(configuration["AiEndpoint:BaseUrl"]);
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {configuration["AiEndpoint:Key"]}");
+            });
+            services.AddIdentity<User, IdentityRole<Guid>>(options =>
             services.AddCors(options =>
             {
                 options.AddPolicy("SignalRCors", policy =>

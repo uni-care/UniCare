@@ -222,41 +222,58 @@ namespace UniCare.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("AvailableFrom")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("AvailableTo")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
-                    b.Property<bool>("IsAvailable")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("Name")
+                    b.Property<string>("ImageUrls")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Location")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<string>("Price")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("Quantity")
+                    b.Property<int>("Status")
                         .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name");
+                    b.HasIndex("CreatedAt");
 
                     b.HasIndex("OwnerId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("Title");
 
                     b.ToTable("Items");
                 });
@@ -347,7 +364,61 @@ namespace UniCare.Infrastructure.Migrations
                     b.ToTable("TransactionHandovers");
                 });
 
-            modelBuilder.Entity("UniCare.Domain.Aggregates.UserAggregates.ApplicationUser", b =>
+            modelBuilder.Entity("UniCare.Domain.Aggregates.UserAggregates.StudentVerification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("DocumentType")
+                        .HasMaxLength(30)
+                        .HasColumnType("int");
+
+                    b.Property<string>("DocumentUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("OcrExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OcrExtractedFaculty")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("OcrExtractedName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("OcrExtractedUniversity")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("OcrRawResponse")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReviewNotes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("SubmittedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("StudentVerifications");
+                });
+
+            modelBuilder.Entity("UniCare.Domain.Aggregates.UserAggregates.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -455,47 +526,19 @@ namespace UniCare.Infrastructure.Migrations
                     b.ToTable("UniCare_Users", (string)null);
                 });
 
-            modelBuilder.Entity("UniCare.Domain.Aggregates.UserAggregates.StudentVerification", b =>
+            modelBuilder.Entity("UniCare.Domain.Aggregates.UserAggregates.UserFavorite", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("DocumentType")
-                        .HasMaxLength(30)
-                        .HasColumnType("int");
-
-                    b.Property<string>("DocumentUrl")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime?>("OcrExpiryDate")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("OcrExtractedFaculty")
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("OcrExtractedName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("OcrExtractedUniversity")
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("OcrRawResponse")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ReviewNotes")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime?>("ReviewedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("SubmittedAt")
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("UserId")
@@ -503,10 +546,12 @@ namespace UniCare.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("UserId", "ItemId")
                         .IsUnique();
 
-                    b.ToTable("StudentVerifications");
+                    b.ToTable("UserFavorites");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -520,7 +565,7 @@ namespace UniCare.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
-                    b.HasOne("UniCare.Domain.Aggregates.UserAggregates.ApplicationUser", null)
+                    b.HasOne("UniCare.Domain.Aggregates.UserAggregates.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -529,7 +574,7 @@ namespace UniCare.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
-                    b.HasOne("UniCare.Domain.Aggregates.UserAggregates.ApplicationUser", null)
+                    b.HasOne("UniCare.Domain.Aggregates.UserAggregates.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -544,7 +589,7 @@ namespace UniCare.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("UniCare.Domain.Aggregates.UserAggregates.ApplicationUser", null)
+                    b.HasOne("UniCare.Domain.Aggregates.UserAggregates.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -553,7 +598,7 @@ namespace UniCare.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
-                    b.HasOne("UniCare.Domain.Aggregates.UserAggregates.ApplicationUser", null)
+                    b.HasOne("UniCare.Domain.Aggregates.UserAggregates.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -573,7 +618,7 @@ namespace UniCare.Infrastructure.Migrations
 
             modelBuilder.Entity("UniCare.Domain.Aggregates.ItemAggregates.Item", b =>
                 {
-                    b.HasOne("UniCare.Domain.Aggregates.UserAggregates.ApplicationUser", "Owner")
+                    b.HasOne("UniCare.Domain.Aggregates.UserAggregates.User", "Owner")
                         .WithMany()
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -584,13 +629,13 @@ namespace UniCare.Infrastructure.Migrations
 
             modelBuilder.Entity("UniCare.Domain.Aggregates.TransactionAggregate.Transaction", b =>
                 {
-                    b.HasOne("UniCare.Domain.Aggregates.UserAggregates.ApplicationUser", null)
+                    b.HasOne("UniCare.Domain.Aggregates.UserAggregates.User", null)
                         .WithMany()
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("UniCare.Domain.Aggregates.UserAggregates.ApplicationUser", null)
+                    b.HasOne("UniCare.Domain.Aggregates.UserAggregates.User", null)
                         .WithMany()
                         .HasForeignKey("RequesterId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -608,11 +653,30 @@ namespace UniCare.Infrastructure.Migrations
 
             modelBuilder.Entity("UniCare.Domain.Aggregates.UserAggregates.StudentVerification", b =>
                 {
-                    b.HasOne("UniCare.Domain.Aggregates.UserAggregates.ApplicationUser", "User")
+                    b.HasOne("UniCare.Domain.Aggregates.UserAggregates.User", "User")
                         .WithOne("StudentVerification")
                         .HasForeignKey("UniCare.Domain.Aggregates.UserAggregates.StudentVerification", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UniCare.Domain.Aggregates.UserAggregates.UserFavorite", b =>
+                {
+                    b.HasOne("UniCare.Domain.Aggregates.ItemAggregates.Item", "Item")
+                        .WithMany("FavoritedBy")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UniCare.Domain.Aggregates.UserAggregates.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
 
                     b.Navigation("User");
                 });
@@ -622,7 +686,12 @@ namespace UniCare.Infrastructure.Migrations
                     b.Navigation("Messages");
                 });
 
-            modelBuilder.Entity("UniCare.Domain.Aggregates.UserAggregates.ApplicationUser", b =>
+            modelBuilder.Entity("UniCare.Domain.Aggregates.ItemAggregates.Item", b =>
+                {
+                    b.Navigation("FavoritedBy");
+                });
+
+            modelBuilder.Entity("UniCare.Domain.Aggregates.UserAggregates.User", b =>
                 {
                     b.Navigation("StudentVerification");
                 });
