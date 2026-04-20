@@ -20,9 +20,10 @@ namespace UniCare.Infrastructure.services
 
         public async Task<List<Guid>> GetRecommendedIdsAsync(string prompt, CancellationToken ct)
         {
+
             var requestBody = new { prompt = prompt, limit = 10 };
 
-            var response = await _httpClient.PostAsJsonAsync("v1/recommendations", requestBody, ct);
+            var response = await _httpClient.PostAsJsonAsync("https://joeann-posthumeral-lakita.ngrok-free.dev/get-recommendations", requestBody, ct);
 
             if (!response.IsSuccessStatusCode)
                 return new List<Guid>();
