@@ -1,10 +1,9 @@
 ﻿using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using UniCare.Application.Item.DTOs;
+using UniCare.Domain.Aggregates.ItemAggregates;
+using UniCare.Domain.Interfaces;
+using UniCare.Domain.VOs;
 
 namespace UniCare.Application.Item.Commands.CreateItem
 {
@@ -21,29 +20,24 @@ namespace UniCare.Application.Item.Commands.CreateItem
         {
             var price = Money.Create(request.Price, request.Currency);
 
-            var item = Item.Create(
+            var item = UniCare.Domain.Aggregates.ItemAggregates.Item.Create(
                 request.Title,
                 request.Description,
                 price,
-                request.OwnerId,
-                request.CategoryId,
-                request.AvailableFrom,
-                request.AvailableTo,
-                request.Location,
-                request.ImageUrls
+                request.OwnerId,           
+                request.AvailableFrom,     
+                request.AvailableTo,       
+                request.Location,          
+                request.ImageUrls          
             );
 
             _context.Items.Add(item);
             await _context.SaveChangesAsync(cancellationToken);
 
             // Reload with navigation properties
-            await _context.Entry(item)
-                .Reference(i => i.Owner)
-                .LoadAsync(cancellationToken);
-
-            await _context.Entry(item)
-                .Reference(i => i.Category)
-                .LoadAsync(cancellationToken);
+            item = await _context.Items
+                .Include(i => i.Owner)
+                .FirstOrDefaultAsync(i => i.Id == item.Id, cancellationToken);
 
             return new ItemDto(
                 item.Id,
@@ -53,15 +47,13 @@ namespace UniCare.Application.Item.Commands.CreateItem
                 item.Price.Currency,
                 item.Status.ToString(),
                 item.OwnerId,
-                item.Owner.FullName,
-                item.CategoryId,
-                item.Category.Name,
+                item.Owner?.FullName ?? string.Empty,
                 item.AvailableFrom,
                 item.AvailableTo,
                 item.Location,
                 item.ImageUrls,
-                false,
-                0,
+                false,   // IsFavorited
+                0,       // FavoriteCount
                 item.CreatedAt,
                 item.UpdatedAt
             );

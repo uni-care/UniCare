@@ -65,7 +65,6 @@ public class ItemsController : ControllerBase
             request.Description,
             request.Price,
             request.Currency,
-            request.CategoryId,
             request.AvailableFrom,
             request.AvailableTo,
             request.Location,

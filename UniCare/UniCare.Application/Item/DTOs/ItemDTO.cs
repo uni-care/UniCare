@@ -15,8 +15,6 @@ namespace UniCare.Application.Item.DTOs
     string Status,
     Guid OwnerId,
     string OwnerName,
-    Guid CategoryId,
-    string CategoryName,
     DateTime? AvailableFrom,
     DateTime? AvailableTo,
     string? Location,

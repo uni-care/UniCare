@@ -23,14 +23,22 @@ namespace UniCare.Application.Item.Queries.GetAllItems
             var items = await _itemRepository.GetAllAsync(cancellationToken);
 
             return items.Select(item => new ItemDto(
-                item.Id,
-                item.Name,
-                item.Description,
-                item.Price,
-                item.Quantity,
-                item.IsAvailable,
-                item.CreatedAt,
-                item.UpdatedAt
+                 item.Id,
+    item.Title,
+    item.Description,
+    item.Price.Amount,
+    item.Price.Currency,
+    item.Status.ToString(),
+    item.OwnerId,
+    item.Owner?.FullName ?? string.Empty,
+    item.AvailableFrom, // Ensure these are present
+    item.AvailableTo,
+    item.Location,
+    item.ImageUrls,
+    false, // IsFavorited
+    0,     // FavoriteCount
+    item.CreatedAt,
+    item.UpdatedAt
             )).ToList();
         }
     }

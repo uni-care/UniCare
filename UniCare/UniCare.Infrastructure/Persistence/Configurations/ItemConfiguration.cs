@@ -57,11 +57,6 @@ namespace UniCare.Infrastructure.Persistence.Configurations
                 .HasForeignKey(i => i.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(i => i.Category)
-                .WithMany()
-                .HasForeignKey(i => i.CategoryId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             builder.HasMany(i => i.FavoritedBy)
                 .WithOne(f => f.Item)
                 .HasForeignKey(f => f.ItemId)

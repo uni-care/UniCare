@@ -26,9 +26,6 @@ namespace UniCare.Application.Item.Commands.CreateItem
                 .NotEmpty().WithMessage("Currency is required.")
                 .Length(3).WithMessage("Currency must be 3 characters (e.g., USD, EUR).");
 
-            RuleFor(x => x.CategoryId)
-                .NotEmpty().WithMessage("Category is required.");
-
             RuleFor(x => x.OwnerId)
                 .NotEmpty().WithMessage("Owner ID is required.");
 
