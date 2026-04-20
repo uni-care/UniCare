@@ -1,31 +1,32 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using UniCare.Domain.Aggregates.ChatAggregate;
-using UniCare.Domain.Aggregates.TransactionAggregate;
-using UniCare.Domain.Aggregates.TransactionHandoverAggregate;
-using UniCare.Infrastructure.Hubs;
-using UniCare.Infrastructure.Persistence;
-using UniCare.Infrastructure.Repositories;
-using UniCare.Infrastructure.Services;
-﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UniCare.Application.Interfaces;
+using UniCare.Domain.Aggregates.ChatAggregate;
+using UniCare.Domain.Aggregates.TransactionAggregate;
+using UniCare.Domain.Aggregates.TransactionHandoverAggregate;
 using UniCare.Domain.Aggregates.UserAggregates;
 using UniCare.Domain.Interfaces;
+using UniCare.Infrastructure.Hubs;
+using UniCare.Infrastructure.Persistence;
+using UniCare.Infrastructure.Persistence;
+using UniCare.Infrastructure.Repositories;
+using UniCare.Infrastructure.services;
+using UniCare.Infrastructure.Services;
 using UniCare.Infrastructure.Services;
 using UniCare.Infrastructure.Settings;
-using UniCare.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 
 
@@ -44,7 +45,10 @@ namespace UniCare.Infrastructure
 
             services.AddScoped<IApplicationDbContext>(provider =>
                 provider.GetRequiredService<UniCareDbContext>());
-
+            services.AddHttpClient<IAiRecommendationService, AiRecommendationService>(client => {
+                client.BaseAddress = new Uri(configuration["AiEndpoint:BaseUrl"]);
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {configuration["AiEndpoint:Key"]}");
+            });
             services.AddIdentity<User, IdentityRole<Guid>>(options =>
             {
                 // Password policy

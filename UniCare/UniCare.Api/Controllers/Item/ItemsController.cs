@@ -1,16 +1,17 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using UniCare.Api.Models;
+using UniCare.Application.Item.Commands;
 using UniCare.Application.Item.Commands.CreateItem;
 using UniCare.Application.Item.Commands.ToggleFavorite;
 using UniCare.Application.Item.Commands.UpdateItem;
 using UniCare.Application.Item.DTOs;
 using UniCare.Application.Item.Queries;
+using UniCare.Application.Item.Queries.GetAiRecommendations;
 using UniCare.Application.Item.Queries.GetAllItems;
 using UniCare.Application.Item.Queries.GetItemById;
-using Microsoft.AspNetCore.Authorization;
-using UniCare.Application.Item.Commands;
-using UniCare.Api.Models;
 
 namespace UniCare.API.Controllers;
 
@@ -139,6 +140,22 @@ public class ItemsController : ControllerBase
         catch (KeyNotFoundException ex)
         {
             return NotFound(new { message = ex.Message });
+        }
+    }
+    [ApiController]
+    [Route("api/[controller]")]
+    public class RecommendationsController : ControllerBase
+    {
+        private readonly IMediator _mediator;
+        public RecommendationsController(IMediator mediator) => _mediator = mediator;
+
+        [HttpGet]
+        public async Task<ActionResult<List<ItemDto>>> Get([FromQuery] string prompt)
+        {
+            if (string.IsNullOrWhiteSpace(prompt)) return BadRequest();
+
+            var result = await _mediator.Send(new GetAiRecommendationsQuery(prompt));
+            return Ok(result);
         }
     }
 }
