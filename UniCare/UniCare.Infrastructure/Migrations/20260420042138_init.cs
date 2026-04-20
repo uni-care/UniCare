@@ -6,11 +6,26 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UniCare.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class authentication : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Chats",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TransactionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OwnerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RequesterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Chats", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "UniCare_Roles",
                 columns: table => new
@@ -34,10 +49,10 @@ namespace UniCare.Infrastructure.Migrations
                     UniversityName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
                     FacultyName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
                     ProfilePictureUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    VerificationStatus = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    VerificationStatus = table.Column<int>(type: "int", nullable: false),
                     IsVerifiedStudent = table.Column<bool>(type: "bit", nullable: false),
                     VerificationBadgeGrantedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    RegistrationMethod = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    RegistrationMethod = table.Column<int>(type: "int", nullable: false),
                     GoogleSubjectId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -62,6 +77,29 @@ namespace UniCare.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Messages",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ChatId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SenderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Body = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
+                    SentAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ReadAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Type = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Messages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Messages_Chats_ChatId",
+                        column: x => x.ChatId,
+                        principalTable: "Chats",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UniCare_RoleClaims",
                 columns: table => new
                 {
@@ -83,12 +121,37 @@ namespace UniCare.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UniCare_StudentVerifications",
+                name: "Items",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    IsAvailable = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    OwnerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Items", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Items_UniCare_Users_OwnerId",
+                        column: x => x.OwnerId,
+                        principalTable: "UniCare_Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "StudentVerifications",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DocumentType = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    DocumentType = table.Column<int>(type: "int", maxLength: 30, nullable: false),
                     DocumentUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     OcrExtractedName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     OcrExtractedUniversity = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
@@ -101,13 +164,45 @@ namespace UniCare.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UniCare_StudentVerifications", x => x.Id);
+                    table.PrimaryKey("PK_StudentVerifications", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UniCare_StudentVerifications_UniCare_Users_UserId",
+                        name: "FK_StudentVerifications_UniCare_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "UniCare_Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Transactions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OwnerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RequesterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    AgreedPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    RentalReturnDue = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Transactions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Transactions_UniCare_Users_OwnerId",
+                        column: x => x.OwnerId,
+                        principalTable: "UniCare_Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Transactions_UniCare_Users_RequesterId",
+                        column: x => x.RequesterId,
+                        principalTable: "UniCare_Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -195,6 +290,84 @@ namespace UniCare.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "TransactionHandovers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TransactionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    TokenHash = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    Pin = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    VerifiedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    GeneratedForUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    VerifiedByUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TransactionHandovers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TransactionHandovers_Transactions_TransactionId",
+                        column: x => x.TransactionId,
+                        principalTable: "Transactions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Chats_OwnerId",
+                table: "Chats",
+                column: "OwnerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Chats_RequesterId",
+                table: "Chats",
+                column: "RequesterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Chats_TransactionId",
+                table: "Chats",
+                column: "TransactionId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Items_Name",
+                table: "Items",
+                column: "Name");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Items_OwnerId",
+                table: "Items",
+                column: "OwnerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_ChatId_SenderId_ReadAt",
+                table: "Messages",
+                columns: new[] { "ChatId", "SenderId", "ReadAt" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentVerifications_UserId",
+                table: "StudentVerifications",
+                column: "UserId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TransactionHandovers_TransactionId_Type_Status",
+                table: "TransactionHandovers",
+                columns: new[] { "TransactionId", "Type", "Status" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transactions_OwnerId_Status",
+                table: "Transactions",
+                columns: new[] { "OwnerId", "Status" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transactions_RequesterId_Status",
+                table: "Transactions",
+                columns: new[] { "RequesterId", "Status" });
+
             migrationBuilder.CreateIndex(
                 name: "IX_UniCare_RoleClaims_RoleId",
                 table: "UniCare_RoleClaims",
@@ -206,12 +379,6 @@ namespace UniCare.Infrastructure.Migrations
                 column: "NormalizedName",
                 unique: true,
                 filter: "[NormalizedName] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UniCare_StudentVerifications_UserId",
-                table: "UniCare_StudentVerifications",
-                column: "UserId",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_UniCare_UserClaims_UserId",
@@ -234,6 +401,16 @@ namespace UniCare.Infrastructure.Migrations
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UniCare_Users_Email",
+                table: "UniCare_Users",
+                column: "Email");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UniCare_Users_IsVerifiedStudent",
+                table: "UniCare_Users",
+                column: "IsVerifiedStudent");
+
+            migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
                 table: "UniCare_Users",
                 column: "NormalizedUserName",
@@ -245,10 +422,19 @@ namespace UniCare.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "UniCare_RoleClaims");
+                name: "Items");
 
             migrationBuilder.DropTable(
-                name: "UniCare_StudentVerifications");
+                name: "Messages");
+
+            migrationBuilder.DropTable(
+                name: "StudentVerifications");
+
+            migrationBuilder.DropTable(
+                name: "TransactionHandovers");
+
+            migrationBuilder.DropTable(
+                name: "UniCare_RoleClaims");
 
             migrationBuilder.DropTable(
                 name: "UniCare_UserClaims");
@@ -261,6 +447,12 @@ namespace UniCare.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "UniCare_UserTokens");
+
+            migrationBuilder.DropTable(
+                name: "Chats");
+
+            migrationBuilder.DropTable(
+                name: "Transactions");
 
             migrationBuilder.DropTable(
                 name: "UniCare_Roles");

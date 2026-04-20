@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +10,7 @@ using UniCare.Domain.Aggregates.ChatAggregate;
 namespace UniCare.Application.Chats.Commands.MarkMessagesRead
 {
     public sealed class MarkMessagesReadCommandHandler
-       : ICommandHandler<MarkMessagesReadCommand, Result>
+       : ICommandHandler<MarkMessagesReadCommand, Result<bool>>
     {
         private readonly IChatRepository _chatRepository;
         private readonly IChatNotificationService _notificationService;
@@ -23,14 +23,14 @@ namespace UniCare.Application.Chats.Commands.MarkMessagesRead
             _notificationService = notificationService;
         }
 
-        public async Task<Result> Handle(
+        public async Task<Result<bool>> Handle(
             MarkMessagesReadCommand command,
             CancellationToken cancellationToken)
         {
             var chat = await _chatRepository.GetByIdAsync(command.ChatId, cancellationToken);
 
             if (chat is null)
-                return Result.Failure("Chat not found.");
+                return Result<bool>.Failure("Chat not found.");
 
             try
             {
@@ -38,7 +38,7 @@ namespace UniCare.Application.Chats.Commands.MarkMessagesRead
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Result.Failure(ex.Message);
+                return Result<bool>.Failure(ex.Message);
             }
 
             await _chatRepository.MarkMessagesReadAsync(
@@ -47,7 +47,7 @@ namespace UniCare.Application.Chats.Commands.MarkMessagesRead
             await _notificationService.NotifyMessagesReadAsync(
                 command.ChatId, command.ReaderId, cancellationToken);
 
-            return Result.Success();
+            return Result<bool>.Success(true);
         }
     }
 }

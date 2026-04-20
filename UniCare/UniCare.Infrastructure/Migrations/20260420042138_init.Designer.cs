@@ -12,8 +12,8 @@ using UniCare.Infrastructure.Persistence;
 namespace UniCare.Infrastructure.Migrations
 {
     [DbContext(typeof(UniCareDbContext))]
-    [Migration("20260419134640_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260420042138_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -156,9 +156,73 @@ namespace UniCare.Infrastructure.Migrations
                     b.ToTable("UniCare_UserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("UniCare.Domain.Aggregates.ChatAggregate.Chat", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RequesterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TransactionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
+
+                    b.HasIndex("RequesterId");
+
+                    b.HasIndex("TransactionId")
+                        .IsUnique();
+
+                    b.ToTable("Chats");
+                });
+
+            modelBuilder.Entity("UniCare.Domain.Aggregates.ChatAggregate.Message", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid>("ChatId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChatId", "SenderId", "ReadAt");
+
+                    b.ToTable("Messages");
+                });
+
             modelBuilder.Entity("UniCare.Domain.Aggregates.ItemAggregates.Item", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
@@ -179,6 +243,9 @@ namespace UniCare.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
@@ -192,7 +259,95 @@ namespace UniCare.Infrastructure.Migrations
 
                     b.HasIndex("Name");
 
-                    b.ToTable("Items", (string)null);
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("Items");
+                });
+
+            modelBuilder.Entity("UniCare.Domain.Aggregates.TransactionAggregate.Transaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("AgreedPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("RentalReturnDue")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("RequesterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId", "Status");
+
+                    b.HasIndex("RequesterId", "Status");
+
+                    b.ToTable("Transactions");
+                });
+
+            modelBuilder.Entity("UniCare.Domain.Aggregates.TransactionHandoverAggregate.TransactionHandover", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("GeneratedForUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Pin")
+                        .IsRequired()
+                        .HasMaxLength(6)
+                        .HasColumnType("nvarchar(6)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<Guid>("TransactionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("VerifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("VerifiedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TransactionId", "Type", "Status");
+
+                    b.ToTable("TransactionHandovers");
                 });
 
             modelBuilder.Entity("UniCare.Domain.Aggregates.UserAggregates.ApplicationUser", b =>
@@ -260,10 +415,8 @@ namespace UniCare.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<string>("RegistrationMethod")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                    b.Property<int>("RegistrationMethod")
+                        .HasColumnType("int");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -285,12 +438,14 @@ namespace UniCare.Infrastructure.Migrations
                     b.Property<DateTime?>("VerificationBadgeGrantedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("VerificationStatus")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                    b.Property<int>("VerificationStatus")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Email");
+
+                    b.HasIndex("IsVerifiedStudent");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -309,10 +464,9 @@ namespace UniCare.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("DocumentType")
-                        .IsRequired()
+                    b.Property<int>("DocumentType")
                         .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("int");
 
                     b.Property<string>("DocumentUrl")
                         .IsRequired()
@@ -355,7 +509,7 @@ namespace UniCare.Infrastructure.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("UniCare_StudentVerifications", (string)null);
+                    b.ToTable("StudentVerifications");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -409,6 +563,52 @@ namespace UniCare.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("UniCare.Domain.Aggregates.ChatAggregate.Message", b =>
+                {
+                    b.HasOne("UniCare.Domain.Aggregates.ChatAggregate.Chat", "Chat")
+                        .WithMany("Messages")
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Chat");
+                });
+
+            modelBuilder.Entity("UniCare.Domain.Aggregates.ItemAggregates.Item", b =>
+                {
+                    b.HasOne("UniCare.Domain.Aggregates.UserAggregates.ApplicationUser", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("UniCare.Domain.Aggregates.TransactionAggregate.Transaction", b =>
+                {
+                    b.HasOne("UniCare.Domain.Aggregates.UserAggregates.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("UniCare.Domain.Aggregates.UserAggregates.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("RequesterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("UniCare.Domain.Aggregates.TransactionHandoverAggregate.TransactionHandover", b =>
+                {
+                    b.HasOne("UniCare.Domain.Aggregates.TransactionAggregate.Transaction", null)
+                        .WithMany()
+                        .HasForeignKey("TransactionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("UniCare.Domain.Aggregates.UserAggregates.StudentVerification", b =>
                 {
                     b.HasOne("UniCare.Domain.Aggregates.UserAggregates.ApplicationUser", "User")
@@ -418,6 +618,11 @@ namespace UniCare.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UniCare.Domain.Aggregates.ChatAggregate.Chat", b =>
+                {
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("UniCare.Domain.Aggregates.UserAggregates.ApplicationUser", b =>

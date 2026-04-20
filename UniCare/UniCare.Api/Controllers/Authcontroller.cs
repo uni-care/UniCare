@@ -1,7 +1,10 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using UniCare.Application.Common;
 using UniCare.Application.User.commands.Auth.Login;
+using UniCare.Application.User.commands.Auth.Logout;
 using UniCare.Application.User.commands.Auth.Register;
 using UniCare.Application.User.DTOs;
 using UniCare.Application.User.DTOs.Auth;
@@ -55,7 +58,19 @@ namespace UniCare.Api.Controllers
             var result = await _mediator.Send(command);
             return ToActionResult(result);
         }
+        [HttpPost("logout")]
+        [Authorize]
+        [ProducesResponseType(typeof(ApiResponse<LogoutResult>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> Logout()
+        {
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
+            var command = new LogoutUserCommand(userId);
+            var result = await _mediator.Send(command);
+
+            return ToActionResult(result);
+        }
 
         [HttpPost("google")]
         [ProducesResponseType(typeof(ApiResponse<AuthResponseDto>), StatusCodes.Status200OK)]

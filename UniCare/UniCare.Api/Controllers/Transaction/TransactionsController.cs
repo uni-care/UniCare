@@ -35,8 +35,8 @@ namespace UniCare.Api.Controllers.Transaction
             var result = await _sender.Send(command, ct);
 
             return result.IsSuccess
-                ? CreatedAtAction(nameof(GetCode), new { id = result.Value!.TransactionId }, result.Value)
-                : BadRequest(new { error = result.Error });
+                ? CreatedAtAction(nameof(GetCode), new { id = result.Data!.TransactionId }, result.Data)
+                : BadRequest(new { error = result.ErrorMessage });
         }
 
 
@@ -54,11 +54,11 @@ namespace UniCare.Api.Controllers.Transaction
             var stageResult = await _sender.Send(new GetCurrentHandoverStageQuery(id), ct);
 
             if (!stageResult.IsSuccess)
-                return NotFound(new { error = stageResult.Error });
+                return NotFound(new { error = stageResult.ErrorMessage });
 
             var generateCommand = new GenerateHandoverCommand(
                 TransactionId: id,
-                Type: stageResult.Value!.NextHandoverType,
+                Type: stageResult.Data!.NextHandoverType,
                 GeneratedForUserId: generatedForUserId,
                 VerifiedByUserId: verifiedByUserId
             );
@@ -66,8 +66,8 @@ namespace UniCare.Api.Controllers.Transaction
             var generateResult = await _sender.Send(generateCommand, ct);
 
             return generateResult.IsSuccess
-                ? Ok(generateResult.Value)
-                : BadRequest(new { error = generateResult.Error });
+                ? Ok(generateResult.Data)
+                : BadRequest(new { error = generateResult.ErrorMessage });
         }
 
 
@@ -89,11 +89,11 @@ namespace UniCare.Api.Controllers.Transaction
             var result = await _sender.Send(command, ct);
 
             if (!result.IsSuccess)
-                return result.Error == "Transaction not found."
-                    ? NotFound(new { error = result.Error })
-                    : BadRequest(new { error = result.Error });
+                return result.ErrorMessage == "Transaction not found."
+                    ? NotFound(new { error = result.ErrorMessage })
+                    : BadRequest(new { error = result.ErrorMessage });
 
-            return Ok(result.Value);
+            return Ok(result.Data);
         }
 
         [HttpGet("active")]
@@ -105,8 +105,8 @@ namespace UniCare.Api.Controllers.Transaction
             var result = await _sender.Send(new GetActiveTransactionsQuery(userId), ct);
 
             return result.IsSuccess
-                ? Ok(result.Value)
-                : BadRequest(new { error = result.Error });
+                ? Ok(result.Data)
+                : BadRequest(new { error = result.ErrorMessage });
         }
     }
 }
