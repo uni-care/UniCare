@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,5 +11,5 @@ namespace UniCare.Application.Chats.Commands.MarkMessagesRead
     public sealed record MarkMessagesReadCommand(
           Guid ChatId,
           Guid ReaderId
-      ) : ICommand<Result>;
+      ) : ICommand<Result<bool>>;
 }

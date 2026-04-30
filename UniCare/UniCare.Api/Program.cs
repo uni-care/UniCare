@@ -1,55 +1,111 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
+using UniCare.Api.Middelware;
 using UniCare.Application;
+using UniCare.Domain.Repositories;
 using UniCare.Infrastructure;
+using UniCare.Infrastructure.Persistence.Repositories;
 
-namespace UniCare.Api
+namespace UniCare.Api;
+
+public class Program
 {
-    public class Program
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
+        var builder = WebApplication.CreateBuilder(args);
+
+        builder.Services.AddControllers();
+
+        builder.Services.AddApplication();
+        builder.Services.AddInfrastructure(builder.Configuration);
+
+        builder.Services.AddDirectoryBrowser();
+        builder.Services.AddScoped<IItemRepository, ItemRepository>();
+        builder.Services.AddCors(options =>
         {
-            var builder = WebApplication.CreateBuilder(args);
-
-            builder.Services.AddControllers();
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(c =>
+            options.AddPolicy("MyCorsPolicy", policy =>
             {
-                c.SwaggerDoc("v1", new() { Title = "UniCare API", Version = "v1" });
+            policy.WithOrigins(
+                    "https://uni-care-front.vercel.app/",
+                    "https://localhost:3000",
+                    "http://localhost:3000"
+                  )
+                  .SetIsOriginAllowedToAllowWildcardSubdomains()
+                      .AllowAnyMethod()
+                      .AllowAnyHeader()
+                      .AllowCredentials();
+            });
+        });
+
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = "UniCare API",
+                Version = "v1",
+                Description = "Peer-to-peer marketplace for university students - Authentication & Verification module.",
+                Contact = new OpenApiContact { Name = "UniCare Team" }
             });
 
-            // CORS is required for SignalR WebSocket handshake from a browser client.
-            // Tighten AllowedOrigins before deploying to production.
-            builder.Services.AddCors(options =>
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            if (File.Exists(xmlPath))
+                options.IncludeXmlComments(xmlPath);
+
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
-                options.AddDefaultPolicy(policy =>
-                    policy.AllowAnyHeader()
-                          .AllowAnyMethod()
-                          .AllowCredentials()
-                          .SetIsOriginAllowed(_ => true));
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Description = "Enter your JWT token. Example: Bearer eyJhbG..."
             });
 
-            // Clean Architecture layers
-            builder.Services.AddApplication();                          // MediatR + Validators + Pipeline
-            builder.Services.AddInfrastructure(builder.Configuration); // EF Core + Repos + Services + SignalR
-
-            var app = builder.Build();
-
-            if (app.Environment.IsDevelopment())
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+        });
+     
 
-            app.UseHttpsRedirection();
-            app.UseCors();
-            app.UseAuthorization();
-            app.MapControllers();
+        var app = builder.Build();
 
-            // Maps /hubs/chat SignalR endpoint
-            app.UseInfrastructure();
+        app.UseGlobalExceptionHandler();
 
-            app.Run();
-        }
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
+        {
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "UniCare API v1");
+            c.RoutePrefix = "swagger";
+            c.DocumentTitle = "UniCare API Documentation";
+            c.DisplayRequestDuration();
+        });
+
+        app.UseHttpsRedirection();
+        app.UseStaticFiles();
+
+        app.UseCors("AllowAll"); 
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.MapControllers();
+
+        app.Run();
     }
 }
