@@ -9,7 +9,7 @@ namespace UniCare.Application.Interfaces
 {
     public interface IJwtService
     {
-        string GenerateToken(ApplicationUser user);
+        string GenerateToken(Domain.Aggregates.UserAggregates.User user);
         DateTime GetTokenExpiry();
     }
 

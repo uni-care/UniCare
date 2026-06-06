@@ -1,31 +1,30 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using UniCare.Domain.Aggregates.ChatAggregate;
-using UniCare.Domain.Aggregates.TransactionAggregate;
-using UniCare.Domain.Aggregates.TransactionHandoverAggregate;
-using UniCare.Infrastructure.Hubs;
-using UniCare.Infrastructure.Persistence;
-using UniCare.Infrastructure.Repositories;
-using UniCare.Infrastructure.Services;
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UniCare.Application.Common.Interfaces;
 using UniCare.Application.Interfaces;
+using UniCare.Domain.Aggregates.ChatAggregate;
+using UniCare.Domain.Aggregates.TransactionAggregate;
+using UniCare.Domain.Aggregates.TransactionHandoverAggregate;
 using UniCare.Domain.Aggregates.UserAggregates;
 using UniCare.Domain.Interfaces;
+using UniCare.Infrastructure.Hubs;
+using UniCare.Infrastructure.Persistence;
+using UniCare.Infrastructure.Repositories;
+using UniCare.Infrastructure.services;
+using UniCare.Infrastructure.services.Ocr;
 using UniCare.Infrastructure.Services;
 using UniCare.Infrastructure.Settings;
-using UniCare.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 
 
@@ -44,17 +43,18 @@ namespace UniCare.Infrastructure
 
             services.AddScoped<IApplicationDbContext>(provider =>
                 provider.GetRequiredService<UniCareDbContext>());
-
-            services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
+            services.AddHttpClient<IAiRecommendationService, AiRecommendationService>(client => {
+                client.BaseAddress = new Uri(configuration["AiEndpoint:BaseUrl"]);
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {configuration["AiEndpoint:Key"]}");
+            });
+            services.AddIdentity<User, IdentityRole<Guid>>(options =>
             {
-                // Password policy
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
                 options.Password.RequireUppercase = true;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredLength = 8;
 
-                // Lockout policy
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
                 options.Lockout.MaxFailedAccessAttempts = 5;
 
@@ -62,6 +62,17 @@ namespace UniCare.Infrastructure
             })
             .AddEntityFrameworkStores<UniCareDbContext>()
             .AddDefaultTokenProviders();
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("SignalRCors", policy =>
+                {
+                    policy.WithOrigins("http://localhost:3000", "https://uni-care-front.vercel.app")
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials();
+                });
+            });
 
             var jwtSection = configuration.GetSection(JwtSettings.SectionName);
             services.Configure<JwtSettings>(jwtSection);
@@ -72,7 +83,6 @@ namespace UniCare.Infrastructure
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
             .AddJwtBearer(options =>
             {
@@ -85,25 +95,44 @@ namespace UniCare.Infrastructure
                     ValidIssuer = jwtSettings.Issuer,
                     ValidAudience = jwtSettings.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ClockSkew = TimeSpan.Zero // No tolerance on expiry
+                    ClockSkew = TimeSpan.Zero
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            path.StartsWithSegments("/hubs/chat"))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
                 };
             });
 
+            var ocrSection = configuration.GetSection(OcrSettings.SectionName);
+            services.Configure<OcrSettings>(ocrSection);
 
+            var ocrSettings = ocrSection.Get<OcrSettings>() ?? new OcrSettings();
 
+            services.AddHttpClient<IOcrService, RealOcrService>();
+      
             services.AddScoped<ITransactionHandoverRepository, TransactionHandoverRepository>();
             services.AddScoped<ITransactionRepository, TransactionRepository>();
             services.AddScoped<IChatRepository, ChatRepository>();
 
             services.AddSingleton<IPinGeneratorService, PinGeneratorService>();
-            // ── Custom Services ───────────────────────────────────────────────────
+
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<ISignInService, SignInService>();
-            services.AddScoped<IOcrService, MockOcrService>();   // Swap for real implementation
             services.AddScoped<IFileStorageService, FileStorageService>();
-
             services.AddScoped<IChatNotificationService, SignalRChatNotificationService>();
-
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddSignalR();
 
             return services;
@@ -111,6 +140,8 @@ namespace UniCare.Infrastructure
 
         public static WebApplication UseInfrastructure(this WebApplication app)
         {
+            app.UseCors("SignalRCors");
+
             app.MapHub<ChatHub>("/hubs/chat");
             return app;
         }

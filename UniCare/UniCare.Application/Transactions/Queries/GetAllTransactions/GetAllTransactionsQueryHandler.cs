@@ -5,26 +5,27 @@ using System.Text;
 using System.Threading.Tasks;
 using UniCare.Application.Common;
 using UniCare.Application.Common.cqrs;
+using UniCare.Application.Transactions.Queries.GetActiveTransactions;
 using UniCare.Domain.Aggregates.TransactionAggregate;
 
-namespace UniCare.Application.Transactions.Queries
+namespace UniCare.Application.Transactions.Queries.GetAllTransactions
 {
-    public sealed class GetActiveTransactionsQueryHandler
-         : IQueryHandler<GetActiveTransactionsQuery, Result<IReadOnlyList<ActiveTransactionResult>>>
+    public sealed class GetAllTransactionsQueryHandler
+          : IQueryHandler<GetAllTransactionsQuery, Result<IReadOnlyList<AllTransactionsResult>>>
     {
         private readonly ITransactionRepository _repository;
 
-        public GetActiveTransactionsQueryHandler(ITransactionRepository repository)
+        public GetAllTransactionsQueryHandler(ITransactionRepository repository)
             => _repository = repository;
 
-        public async Task<Result<IReadOnlyList<ActiveTransactionResult>>> Handle(
-            GetActiveTransactionsQuery query,
+        public async Task<Result<IReadOnlyList<AllTransactionsResult>>> Handle(
+            GetAllTransactionsQuery query,
             CancellationToken cancellationToken)
         {
-            var transactions = await _repository.GetActiveByUserAsync(query.UserId, cancellationToken);
+            var transactions = await _repository.GetByUserAsync(query.UserId, cancellationToken);
 
-            var results = transactions
-                .Select(t => new ActiveTransactionResult(
+            var result = transactions
+                .Select(t => new AllTransactionsResult(
                     TransactionId: t.Id,
                     ItemId: t.ItemId,
                     Type: t.Type,
@@ -36,7 +37,7 @@ namespace UniCare.Application.Transactions.Queries
                 ))
                 .ToList();
 
-            return Result<IReadOnlyList<ActiveTransactionResult>>.Success(results);
+            return Result<IReadOnlyList<AllTransactionsResult>>.Success(result);
         }
     }
 }

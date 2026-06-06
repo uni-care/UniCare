@@ -18,6 +18,12 @@ namespace UniCare.Infrastructure.Repositories
         public async Task<Transaction?> GetByIdAsync(Guid id, CancellationToken ct = default)
             => await _db.Transactions.FindAsync([id], ct);
 
+        public async Task<IReadOnlyList<Transaction>> GetByUserAsync(
+            Guid userId, CancellationToken ct = default)
+            => await _db.Transactions
+                .Where(t => t.OwnerId == userId || t.RequesterId == userId)
+                .OrderByDescending(t => t.CreatedAt)
+                .ToListAsync(ct);
         public async Task<IReadOnlyList<Transaction>> GetActiveByUserAsync(
             Guid userId, CancellationToken ct = default)
             => await _db.Transactions

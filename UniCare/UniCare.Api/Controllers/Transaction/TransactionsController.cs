@@ -1,9 +1,13 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using UniCare.Api.Controllers.Transaction.Requests;
+using UniCare.Application.Common.Interfaces;
 using UniCare.Application.Handover.Commands.GenerateHandover;
 using UniCare.Application.Transactions.Commands.CreateTransaction;
 using UniCare.Application.Transactions.Queries;
+using UniCare.Application.Transactions.Queries.GetActiveTransactions;
+using UniCare.Application.Transactions.Queries.GetAllTransactions;
+using UniCare.Application.Transactions.Queries.GetCurrentHandoverStage;
 
 namespace UniCare.Api.Controllers.Transaction
 {
@@ -11,11 +15,14 @@ namespace UniCare.Api.Controllers.Transaction
     [Route("api/transactions")]
     public class TransactionsController : ControllerBase
     {
-        private readonly ISender _sender;
+        private readonly IMediator _mediator;
+        private readonly ICurrentUserService _currentUserService;
+        public TransactionsController(IMediator mediator, ICurrentUserService currentUserService)
+        {
+            _mediator = mediator;
+            _currentUserService = currentUserService;
+        }
 
-        public TransactionsController(ISender sender) => _sender = sender;
-
-       
         [HttpPost]
         [ProducesResponseType(typeof(CreateTransactionResult), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -32,7 +39,7 @@ namespace UniCare.Api.Controllers.Transaction
                 RentalReturnDue: request.RentalReturnDue
             );
 
-            var result = await _sender.Send(command, ct);
+            var result = await _mediator.Send(command, ct);
 
             return result.IsSuccess
                 ? CreatedAtAction(nameof(GetCode), new { id = result.Data!.TransactionId }, result.Data)
@@ -51,7 +58,7 @@ namespace UniCare.Api.Controllers.Transaction
             [FromQuery] Guid verifiedByUserId,
             CancellationToken ct)
         {
-            var stageResult = await _sender.Send(new GetCurrentHandoverStageQuery(id), ct);
+            var stageResult = await _mediator.Send(new GetCurrentHandoverStageQuery(id), ct);
 
             if (!stageResult.IsSuccess)
                 return NotFound(new { error = stageResult.ErrorMessage });
@@ -63,7 +70,7 @@ namespace UniCare.Api.Controllers.Transaction
                 VerifiedByUserId: verifiedByUserId
             );
 
-            var generateResult = await _sender.Send(generateCommand, ct);
+            var generateResult = await _mediator.Send(generateCommand, ct);
 
             return generateResult.IsSuccess
                 ? Ok(generateResult.Data)
@@ -86,7 +93,7 @@ namespace UniCare.Api.Controllers.Transaction
                 RawPin: request.Pin
             );
 
-            var result = await _sender.Send(command, ct);
+            var result = await _mediator.Send(command, ct);
 
             if (!result.IsSuccess)
                 return result.ErrorMessage == "Transaction not found."
@@ -102,7 +109,19 @@ namespace UniCare.Api.Controllers.Transaction
             [FromQuery] Guid userId,
             CancellationToken ct)
         {
-            var result = await _sender.Send(new GetActiveTransactionsQuery(userId), ct);
+            var result = await _mediator.Send(new GetActiveTransactionsQuery(userId), ct);
+
+            return result.IsSuccess
+                ? Ok(result.Data)
+                : BadRequest(new { error = result.ErrorMessage });
+        }
+        [HttpGet("all")]
+        [ProducesResponseType(typeof(IReadOnlyList<AllTransactionsResult>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetByUserId(
+           CancellationToken ct)
+        {
+            Guid userId = _currentUserService.UserId ?? throw new UnauthorizedAccessException();
+            var result = await _mediator.Send(new GetAllTransactionsQuery(userId), ct);
 
             return result.IsSuccess
                 ? Ok(result.Data)

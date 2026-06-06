@@ -25,7 +25,7 @@ namespace UniCare.Application.Interfaces
 
     public interface ISignInService
     {
-        Task<SignInServiceResult> CheckPasswordSignInAsync(ApplicationUser user, string password);
+        Task<SignInServiceResult> CheckPasswordSignInAsync(Domain.Aggregates.UserAggregates.User user, string password);
     }
 
 }

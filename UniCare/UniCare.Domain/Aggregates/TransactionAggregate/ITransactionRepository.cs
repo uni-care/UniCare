@@ -10,7 +10,8 @@ namespace UniCare.Domain.Aggregates.TransactionAggregate
         public interface ITransactionRepository
         {
             Task<Transaction?> GetByIdAsync(Guid id, CancellationToken ct = default);
-           
+            Task<IReadOnlyList<Transaction>> GetByUserAsync(Guid userId, CancellationToken ct = default);
+
             Task<IReadOnlyList<Transaction>> GetActiveByUserAsync(Guid userId, CancellationToken ct = default);
 
             Task AddAsync(Transaction transaction, CancellationToken ct = default);

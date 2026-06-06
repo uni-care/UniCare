@@ -16,11 +16,11 @@ namespace UniCare.Application.User.Queries.GetVerificationStatus
     public class GetVerificationStatusQueryHandler
     : IRequestHandler<GetVerificationStatusQuery, Result<VerificationStatusDto>>
     {
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<Domain.Aggregates.UserAggregates.User> _userManager;
         private readonly IApplicationDbContext _dbContext;
 
         public GetVerificationStatusQueryHandler(
-            UserManager<ApplicationUser> userManager,
+            UserManager<Domain.Aggregates.UserAggregates.User> userManager,
             IApplicationDbContext dbContext)
         {
             _userManager = userManager;

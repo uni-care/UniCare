@@ -16,11 +16,11 @@ namespace UniCare.Application.User.commands.Auth.Register
 {
     public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<AuthResponseDto>>
     {
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<Domain.Aggregates.UserAggregates.User> _userManager;
         private readonly IJwtService _jwtService;
 
         public RegisterUserCommandHandler(
-            UserManager<ApplicationUser> userManager,
+            UserManager<Domain.Aggregates.UserAggregates.User> userManager,
             IJwtService jwtService)
         {
             _userManager = userManager;
@@ -56,7 +56,7 @@ namespace UniCare.Application.User.commands.Auth.Register
             }
 
             //  Create User
-            var user = new ApplicationUser
+            var user = new Domain.Aggregates.UserAggregates.User
             {
                 FullName = request.FullName,
                 Email = request.Email,

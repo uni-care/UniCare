@@ -15,12 +15,12 @@ namespace UniCare.Application.User.commands.Auth.Login
 {
     public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, Result<AuthResponseDto>>
     {
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<Domain.Aggregates.UserAggregates.User> _userManager;
         private readonly ISignInService _signInService;
         private readonly IJwtService _jwtService;
 
         public LoginUserCommandHandler(
-            UserManager<ApplicationUser> userManager,
+            UserManager<Domain.Aggregates.UserAggregates.User> userManager,
             ISignInService signInService,
             IJwtService jwtService)
         {
