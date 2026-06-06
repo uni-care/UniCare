@@ -7,7 +7,7 @@ using UniCare.Application.Common;
 using UniCare.Application.Common.cqrs;
 using UniCare.Domain.Aggregates.TransactionAggregate;
 
-namespace UniCare.Application.Transactions.Queries
+namespace UniCare.Application.Transactions.Queries.GetCurrentHandoverStage
 {
     public sealed class GetCurrentHandoverStageQueryHandler
         : IQueryHandler<GetCurrentHandoverStageQuery, Result<CurrentHandoverStageResult>>

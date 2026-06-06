@@ -1,11 +1,13 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Graph.Models;
 using UniCare.Api.Controllers.Chat.Requests;
 using UniCare.Application.Chats.Commands.GetOrCreateChat;
 using UniCare.Application.Chats.Commands.MarkMessagesRead;
 using UniCare.Application.Chats.Commands.SendMessage;
 using UniCare.Application.Chats.Queries.GetConversation;
 using UniCare.Application.Chats.Queries.GetUserChats;
+using UniCare.Application.Common.Interfaces;
 using UniCare.Domain.Aggregates.ChatAggregate;
 
 namespace UniCare.Api.Controllers.Chat
@@ -15,15 +17,20 @@ namespace UniCare.Api.Controllers.Chat
     public class ChatController : ControllerBase
     {
         private readonly ISender _sender;
+        private readonly ICurrentUserService _currentUserService;
 
-        public ChatController(ISender sender) => _sender = sender;
+        public ChatController(ISender sender, ICurrentUserService currentUserService)
+        {
+            _sender = sender;
+            _currentUserService = currentUserService;
+        }
 
         [HttpGet]
         [ProducesResponseType(typeof(IReadOnlyList<ChatSummaryResult>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetUserChats(
-            [FromQuery] Guid userId,
             CancellationToken ct)
         {
+            Guid userId = _currentUserService.UserId ?? throw new UnauthorizedAccessException();
             var result = await _sender.Send(new GetUserChatsQuery(userId), ct);
             return result.IsSuccess ? Ok(result) : BadRequest(new { error = result.ErrorMessage });
         }

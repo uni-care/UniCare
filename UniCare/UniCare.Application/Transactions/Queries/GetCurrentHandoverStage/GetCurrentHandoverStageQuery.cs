@@ -8,7 +8,7 @@ using UniCare.Application.Common.cqrs;
 using UniCare.Domain.Aggregates.TransactionAggregate;
 using UniCare.Domain.Aggregates.TransactionHandoverAggregate;
 
-namespace UniCare.Application.Transactions.Queries
+namespace UniCare.Application.Transactions.Queries.GetCurrentHandoverStage
 {
     public sealed record GetCurrentHandoverStageQuery(
          Guid TransactionId

@@ -1,37 +1,30 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Extensions.DependencyInjection;
-using UniCare.Domain.Aggregates.ChatAggregate;
-using UniCare.Domain.Aggregates.TransactionAggregate;
-using UniCare.Domain.Aggregates.TransactionHandoverAggregate;
-using UniCare.Infrastructure.Hubs;
-using UniCare.Infrastructure.Persistence;
-using UniCare.Infrastructure.Repositories;
-using UniCare.Infrastructure.Services;
-﻿using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UniCare.Application.Common.Interfaces;
 using UniCare.Application.Interfaces;
 using UniCare.Domain.Aggregates.ChatAggregate;
 using UniCare.Domain.Aggregates.TransactionAggregate;
 using UniCare.Domain.Aggregates.TransactionHandoverAggregate;
 using UniCare.Domain.Aggregates.UserAggregates;
 using UniCare.Domain.Interfaces;
-using UniCare.Infrastructure.Settings;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+using UniCare.Infrastructure.Hubs;
+using UniCare.Infrastructure.Persistence;
+using UniCare.Infrastructure.Repositories;
+using UniCare.Infrastructure.services;
 using UniCare.Infrastructure.services.Ocr;
+using UniCare.Infrastructure.Services;
+using UniCare.Infrastructure.Settings;
 
 
 
@@ -55,18 +48,6 @@ namespace UniCare.Infrastructure
                 client.DefaultRequestHeaders.Add("Authorization", $"Bearer {configuration["AiEndpoint:Key"]}");
             });
             services.AddIdentity<User, IdentityRole<Guid>>(options =>
-            services.AddCors(options =>
-            {
-                options.AddPolicy("SignalRCors", policy =>
-                {
-                    policy.WithOrigins("http://localhost:3000", "https://uni-care-front.vercel.app/") // Add your frontend URLs
-                          .AllowAnyMethod()
-                          .AllowAnyHeader()
-                          .AllowCredentials(); 
-                });
-            });
-
-            services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
             {
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
@@ -82,6 +63,17 @@ namespace UniCare.Infrastructure
             .AddEntityFrameworkStores<UniCareDbContext>()
             .AddDefaultTokenProviders();
 
+            services.AddCors(options =>
+            {
+                options.AddPolicy("SignalRCors", policy =>
+                {
+                    policy.WithOrigins("http://localhost:3000", "https://uni-care-front.vercel.app")
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials();
+                });
+            });
+
             var jwtSection = configuration.GetSection(JwtSettings.SectionName);
             services.Configure<JwtSettings>(jwtSection);
 
@@ -91,7 +83,6 @@ namespace UniCare.Infrastructure
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
             .AddJwtBearer(options =>
             {
@@ -141,7 +132,7 @@ namespace UniCare.Infrastructure
             services.AddScoped<ISignInService, SignInService>();
             services.AddScoped<IFileStorageService, FileStorageService>();
             services.AddScoped<IChatNotificationService, SignalRChatNotificationService>();
-
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddSignalR();
 
             return services;
