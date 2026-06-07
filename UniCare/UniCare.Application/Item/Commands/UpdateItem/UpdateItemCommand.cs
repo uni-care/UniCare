@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +15,6 @@ namespace UniCare.Application.Item.Commands.UpdateItem
     string? Description,
     decimal? Price,
     string? Currency,
-    Guid? CategoryId,
     string? Status,
     DateTime? AvailableFrom,
     DateTime? AvailableTo,

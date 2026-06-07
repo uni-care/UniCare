@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Text.Json;
 using UniCare.Application.Common;
 using FluentValidation;
@@ -48,7 +48,7 @@ namespace UniCare.Api.Middelware
                 await WriteErrorAsync(
                     context,
                     HttpStatusCode.InternalServerError,
-                    "An unexpected error occurred. Please try again later.",
+                    $"{ex.Message} | {ex.StackTrace}",
                     "INTERNAL_SERVER_ERROR");
             }
         }

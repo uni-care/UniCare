@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -33,6 +33,7 @@ public class ItemsController : ControllerBase
         return Guid.Parse(userIdClaim!);
     }
     [HttpGet]
+    [AllowAnonymous] // TODO: remove it when implementing proper integration with frontend  "almonther :3"
     [ProducesResponseType(typeof(List<ItemDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllItems(CancellationToken cancellationToken)
     {
@@ -42,6 +43,7 @@ public class ItemsController : ControllerBase
     }
 
     [HttpGet("{itemId:guid}")]
+    [AllowAnonymous] // TODO: remove it when implementing proper integration with frontend
     [ProducesResponseType(typeof(ItemDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ItemDto>> GetItemById(Guid itemId)
@@ -103,7 +105,6 @@ public class ItemsController : ControllerBase
                 request.Description,
                 request.Price,
                 request.Currency,
-                request.CategoryId,
                 request.Status,
                 request.AvailableFrom,
                 request.AvailableTo,

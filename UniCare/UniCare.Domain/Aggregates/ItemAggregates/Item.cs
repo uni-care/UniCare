@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -13,12 +13,11 @@ namespace UniCare.Domain.Aggregates.ItemAggregates
 {
     public class Item : BaseEntity
     {
-        public string Title { get; private set; }
+                public string Title { get; private set; }
         public string Description { get; private set; }
         public Money Price { get; private set; }
         public ItemStatus Status { get; private set; }
         public Guid OwnerId { get; private set; }
-        public Guid CategoryId { get; private set; }
         public DateTime? AvailableFrom { get; private set; }
         public DateTime? AvailableTo { get; private set; }
         public string? Location { get; private set; }
@@ -63,7 +62,6 @@ namespace UniCare.Domain.Aggregates.ItemAggregates
             string? title = null,
             string? description = null,
             Money? price = null,
-            Guid? categoryId = null,
             DateTime? availableFrom = null,
             DateTime? availableTo = null,
             string? location = null,
@@ -72,7 +70,6 @@ namespace UniCare.Domain.Aggregates.ItemAggregates
             if (!string.IsNullOrWhiteSpace(title)) Title = title;
             if (!string.IsNullOrWhiteSpace(description)) Description = description;
             if (price != null) Price = price;
-            if (categoryId.HasValue) CategoryId = categoryId.Value;
             if (availableFrom.HasValue) AvailableFrom = availableFrom;
             if (availableTo.HasValue) AvailableTo = availableTo;
             if (location != null) Location = location;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -63,7 +63,6 @@ namespace UniCare.Infrastructure.Persistence.Configurations
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasIndex(i => i.OwnerId);
-            builder.HasIndex(i => i.CategoryId);
             builder.HasIndex(i => i.Status);
             builder.HasIndex(i => i.CreatedAt);
         }

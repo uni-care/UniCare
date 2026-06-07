@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -44,7 +44,6 @@ namespace UniCare.Application.Item.Commands.UpdateItem
                 request.Title,
                 request.Description,
                 price,
-                request.CategoryId,
                 request.AvailableFrom,
                 request.AvailableTo,
                 request.Location,
