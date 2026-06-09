@@ -26,6 +26,7 @@ namespace UniCare.Domain.Aggregates.ItemAggregates
 
         // Navigation properties
         public virtual User Owner { get; private set; }
+        public virtual Category Category { get; private set; }
         public virtual ICollection<UserFavorite> FavoritedBy { get; private set; } = new List<UserFavorite>();
 
         private Item() { } // EF Core
@@ -35,6 +36,7 @@ namespace UniCare.Domain.Aggregates.ItemAggregates
             string description,
             Money price,
             Guid ownerId,
+            Guid categoryId,
             DateTime? availableFrom = null,
             DateTime? availableTo = null,
             string? location = null,
@@ -48,6 +50,7 @@ namespace UniCare.Domain.Aggregates.ItemAggregates
                 Price = price,
                 Status = ItemStatus.Draft,
                 OwnerId = ownerId,
+                CategoryId = categoryId,
                 AvailableFrom = availableFrom,
                 AvailableTo = availableTo,
                 Location = location,

@@ -29,6 +29,9 @@ namespace UniCare.Application.Item.Commands.CreateItem
             RuleFor(x => x.OwnerId)
                 .NotEmpty().WithMessage("Owner ID is required.");
 
+            RuleFor(x => x.CategoryId)
+                .NotEmpty().WithMessage("Category ID is required.");
+
             RuleFor(x => x.AvailableTo)
                 .GreaterThan(x => x.AvailableFrom)
                 .When(x => x.AvailableFrom.HasValue && x.AvailableTo.HasValue)
