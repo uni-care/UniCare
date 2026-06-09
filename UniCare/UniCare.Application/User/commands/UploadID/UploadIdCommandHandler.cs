@@ -44,9 +44,9 @@ namespace UniCare.Application.User.commands.UploadID
                 return Result<UploadIdResponseDto>.NotFound("User not found.");
 
             var folder = $"verifications/{request.UserId}";
-            var documentUrl = await _fileStorage.SaveFileAsync(
-                request.FileContent, request.FileName, folder);
-
+            var uploadResult = await _fileStorage.UploadAsync(
+            request.FileContent, request.FileName, folder, cancellationToken);
+            var documentUrl = uploadResult.Url;
             using var stream = new MemoryStream(request.FileContent);
 
             var ocrData = await _ocrService.ExtractStudentDataAsync(

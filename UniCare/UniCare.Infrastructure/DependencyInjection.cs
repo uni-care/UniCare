@@ -120,6 +120,11 @@ namespace UniCare.Infrastructure
 
             var ocrSettings = ocrSection.Get<OcrSettings>() ?? new OcrSettings();
 
+
+            var cloudinarySection = configuration.GetSection(CloudinarySettings.SectionName);
+            services.Configure<CloudinarySettings>(cloudinarySection);
+            services.AddScoped<IFileStorageService, CloudinaryFileStorageService>();
+
             services.AddHttpClient<IOcrService, RealOcrService>();
       
             services.AddScoped<ITransactionHandoverRepository, TransactionHandoverRepository>();
@@ -130,7 +135,6 @@ namespace UniCare.Infrastructure
 
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<ISignInService, SignInService>();
-            services.AddScoped<IFileStorageService, FileStorageService>();
             services.AddScoped<IChatNotificationService, SignalRChatNotificationService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddSignalR();
