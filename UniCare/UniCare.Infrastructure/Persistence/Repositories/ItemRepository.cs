@@ -16,10 +16,20 @@ namespace UniCare.Infrastructure.Persistence.Repositories
         {
         }
 
+        public override async Task<List<Item>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .Include(i => i.Owner)
+                .Include(i => i.Category)
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<List<Item>> GetAvailableItemsAsync(CancellationToken cancellationToken = default)
         {
             return await _dbSet
                 .AsNoTracking()
+                .Include(i => i.Category)
                 .Where(i => i.Status == ItemStatus.Available)
                 .ToListAsync(cancellationToken);
         }

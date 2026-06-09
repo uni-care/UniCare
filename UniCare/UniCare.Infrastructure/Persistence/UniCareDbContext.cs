@@ -31,6 +31,7 @@ namespace UniCare.Infrastructure.Persistence
         public DbSet<Chat> Chats => Set<Chat>();
         public DbSet<Message> Messages => Set<Message>();
         public DbSet<StudentVerification> StudentVerifications => Set<StudentVerification>();
+        public DbSet<Category> Categories { get; set; } = null!;
         public DbSet<Item> Items { get; set; } = null!;
         public DbSet<UserFavorite> UserFavorites { get; set; } = null!;
 
@@ -197,6 +198,33 @@ namespace UniCare.Infrastructure.Persistence
                 entity.HasIndex(e => e.IsVerifiedStudent);
             });
 
+            // ── Category ────────────────────────────────────────────────────
+            builder.Entity<Category>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Name)
+                      .IsRequired()
+                      .HasMaxLength(100);
+
+                entity.Property(e => e.Description)
+                      .HasMaxLength(500);
+
+                entity.Property(e => e.CreatedAt)
+                      .IsRequired();
+
+                entity.Property(e => e.UpdatedAt)
+                      .IsRequired();
+
+                entity.HasIndex(e => e.Name)
+                      .IsUnique();
+
+                entity.HasMany(c => c.Items)
+                      .WithOne(i => i.Category)
+                      .HasForeignKey(i => i.CategoryId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
             // ── Item ──────────────────────────────────────────────────────────
             builder.Entity<Item>(entity =>
             {
@@ -245,6 +273,7 @@ namespace UniCare.Infrastructure.Persistence
 
                 entity.HasIndex(e => e.Title);
                 entity.HasIndex(e => e.OwnerId);
+                entity.HasIndex(e => e.CategoryId);
                 entity.HasIndex(e => e.Status);
                 entity.HasIndex(e => e.CreatedAt);
 
@@ -252,6 +281,11 @@ namespace UniCare.Infrastructure.Persistence
                 entity.HasOne(i => i.Owner)
                       .WithMany()
                       .HasForeignKey(i => i.OwnerId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(i => i.Category)
+                      .WithMany(c => c.Items)
+                      .HasForeignKey(i => i.CategoryId)
                       .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasMany(i => i.FavoritedBy)

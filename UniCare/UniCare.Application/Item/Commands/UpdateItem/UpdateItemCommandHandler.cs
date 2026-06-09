@@ -1,10 +1,5 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UniCare.Application.Item.DTOs;
 using UniCare.Domain.Enums;
 using UniCare.Domain.Interfaces;
@@ -25,6 +20,7 @@ namespace UniCare.Application.Item.Commands.UpdateItem
         {
             var item = await _context.Items
                 .Include(i => i.Owner)
+                .Include(i => i.Category)
                 .Include(i => i.FavoritedBy)
                 .FirstOrDefaultAsync(i => i.Id == request.ItemId, cancellationToken);
 
@@ -33,6 +29,15 @@ namespace UniCare.Application.Item.Commands.UpdateItem
 
             if (item.OwnerId != request.RequestingUserId)
                 throw new UnauthorizedAccessException("You are not authorized to update this item.");
+
+            if (request.CategoryId.HasValue)
+            {
+                var categoryExists = await _context.Categories
+                    .AnyAsync(c => c.Id == request.CategoryId.Value, cancellationToken);
+
+                if (!categoryExists)
+                    throw new KeyNotFoundException($"Category with ID {request.CategoryId.Value} not found.");
+            }
 
             Money? price = null;
             if (request.Price.HasValue && !string.IsNullOrEmpty(request.Currency))
@@ -58,23 +63,15 @@ namespace UniCare.Application.Item.Commands.UpdateItem
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            return new ItemDto(
-                item.Id,
-                item.Title,
-                item.Description,
-                item.Price.Amount,
-                item.Price.Currency,
-                item.Status.ToString(),
-                item.OwnerId,
-                item.Owner.FullName,
-                item.AvailableFrom,
-                item.AvailableTo,
-                item.Location,
-                item.ImageUrls,
-                item.FavoritedBy.Any(f => f.UserId == request.RequestingUserId),
-                item.FavoritedBy.Count,
-                item.CreatedAt,
-                item.UpdatedAt
+            item = await _context.Items
+                .Include(i => i.Owner)
+                .Include(i => i.Category)
+                .Include(i => i.FavoritedBy)
+                .FirstAsync(i => i.Id == request.ItemId, cancellationToken);
+
+            return ItemDtoMapper.Map(
+                item,
+                item.FavoritedBy.Any(f => f.UserId == request.RequestingUserId)
             );
         }
     }

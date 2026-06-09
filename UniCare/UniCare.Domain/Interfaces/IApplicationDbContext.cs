@@ -16,6 +16,7 @@ namespace UniCare.Domain.Interfaces
         DbSet<StudentVerification> StudentVerifications { get; }
 
         // New DbSets for Items feature
+        DbSet<Category> Categories { get; }
         DbSet<Item> Items { get; }
         DbSet<UserFavorite> UserFavorites { get; }
 
