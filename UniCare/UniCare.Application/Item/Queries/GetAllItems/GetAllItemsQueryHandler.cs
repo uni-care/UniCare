@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using UniCare.Application.Item.DTOs;
-using UniCare.Domain.Repositories;
+using UniCare.Domain.Aggregates.ItemAggregates;
 
 namespace UniCare.Application.Item.Queries.GetAllItems
 {

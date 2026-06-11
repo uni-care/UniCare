@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using UniCare.Domain.Aggregates.ItemAggregates;
 using UniCare.Domain.Enums;
-using UniCare.Domain.Repositories;
 
 namespace UniCare.Infrastructure.Persistence.Repositories
 {
