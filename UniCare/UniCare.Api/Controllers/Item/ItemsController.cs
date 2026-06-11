@@ -35,6 +35,7 @@ public class ItemsController : ControllerBase
     }
     [HttpGet]
     [ProducesResponseType(typeof(List<ItemDto>), StatusCodes.Status200OK)]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAllItems(CancellationToken cancellationToken)
     {
         var query = new GetAllItemsQuery();
