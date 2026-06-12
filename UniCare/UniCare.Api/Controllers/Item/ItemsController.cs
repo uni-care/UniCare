@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -32,8 +32,15 @@ public class ItemsController : ControllerBase
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return Guid.Parse(userIdClaim!);
     }
+
+    /// <summary>
+    /// Returns all marketplace items.
+    /// </summary>
+    /// <response code="200">List of items.</response>
+    /// <response code="401">Not authenticated.</response>
     [HttpGet]
     [ProducesResponseType(typeof(List<ItemDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetAllItems(CancellationToken cancellationToken)
     {
         var query = new GetAllItemsQuery();
@@ -41,8 +48,16 @@ public class ItemsController : ControllerBase
         return Ok(result);
     }
 
+    /// <summary>
+    /// Returns a single item by its ID.
+    /// </summary>
+    /// <param name="itemId">The unique identifier of the item.</param>
+    /// <response code="200">The requested item.</response>
+    /// <response code="401">Not authenticated.</response>
+    /// <response code="404">Item not found.</response>
     [HttpGet("{itemId:guid}")]
     [ProducesResponseType(typeof(ItemDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ItemDto>> GetItemById(Guid itemId)
     {
@@ -62,9 +77,17 @@ public class ItemsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Creates a new marketplace item owned by the authenticated user.
+    /// </summary>
+    /// <param name="request">Item creation payload.</param>
+    /// <response code="201">Item created successfully.</response>
+    /// <response code="400">Validation error or bad request.</response>
+    /// <response code="401">Not authenticated.</response>
     [HttpPost]
     [ProducesResponseType(typeof(ItemDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<ItemDto>> CreateItem([FromBody] CreateItemRequest request)
     {
         var currentUserId = GetCurrentUserId();
@@ -86,12 +109,29 @@ public class ItemsController : ControllerBase
         return CreatedAtAction(nameof(GetItemById), new { itemId = result.Id }, result);
     }
 
+    /// <summary>
+    /// Updates an existing marketplace item. Only the item owner may perform this operation.
+    /// </summary>
+    /// <param name="itemId">The unique identifier of the item to update.</param>
+    /// <param name="request">Fields to update. All fields are optional; omitted fields remain unchanged.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <response code="200">Item updated successfully; returns the full updated item.</response>
+    /// <response code="400">Request body is malformed.</response>
+    /// <response code="401">Not authenticated.</response>
+    /// <response code="403">Authenticated user is not the owner of this item.</response>
+    /// <response code="404">Item or referenced category not found.</response>
+    /// <response code="422">One or more validation errors in the request body.</response>
     [HttpPut("{itemId:guid}")]
     [ProducesResponseType(typeof(ItemDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<ItemDto>> UpdateItem(Guid itemId, [FromBody] UpdateItemRequest request)
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+    public async Task<ActionResult<ItemDto>> UpdateItem(
+        Guid itemId,
+        [FromBody] UpdateItemRequest request,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -112,7 +152,7 @@ public class ItemsController : ControllerBase
                 request.ImageUrls
             );
 
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command, cancellationToken);
             return Ok(result);
         }
         catch (KeyNotFoundException ex)
@@ -121,12 +161,20 @@ public class ItemsController : ControllerBase
         }
         catch (UnauthorizedAccessException ex)
         {
-            return Forbid(ex.Message);
+            return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message });
         }
     }
 
+    /// <summary>
+    /// Toggles the favorite status of an item for the authenticated user.
+    /// </summary>
+    /// <param name="itemId">The unique identifier of the item.</param>
+    /// <response code="200">Favorite toggled; response indicates new favorite state.</response>
+    /// <response code="401">Not authenticated.</response>
+    /// <response code="404">Item not found.</response>
     [HttpPost("{itemId:guid}/favorite")]
     [ProducesResponseType(typeof(FavoriteResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<FavoriteResponse>> ToggleFavorite(Guid itemId)
     {
@@ -143,6 +191,7 @@ public class ItemsController : ControllerBase
             return NotFound(new { message = ex.Message });
         }
     }
+
     [ApiController]
     [Route("api/[controller]")]
     public class RecommendationsController : ControllerBase

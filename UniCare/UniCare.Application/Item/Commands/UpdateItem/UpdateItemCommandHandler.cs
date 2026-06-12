@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using UniCare.Application.Item.DTOs;
 using UniCare.Domain.Enums;
@@ -19,9 +19,6 @@ namespace UniCare.Application.Item.Commands.UpdateItem
         public async Task<ItemDto> Handle(UpdateItemCommand request, CancellationToken cancellationToken)
         {
             var item = await _context.Items
-                .Include(i => i.Owner)
-                .Include(i => i.Category)
-                .Include(i => i.FavoritedBy)
                 .FirstOrDefaultAsync(i => i.Id == request.ItemId, cancellationToken);
 
             if (item == null)
@@ -40,10 +37,8 @@ namespace UniCare.Application.Item.Commands.UpdateItem
             }
 
             Money? price = null;
-            if (request.Price.HasValue && !string.IsNullOrEmpty(request.Currency))
-            {
+            if (request.Price.HasValue && !string.IsNullOrWhiteSpace(request.Currency))
                 price = Money.Create(request.Price.Value, request.Currency);
-            }
 
             item.Update(
                 request.Title,
@@ -56,23 +51,38 @@ namespace UniCare.Application.Item.Commands.UpdateItem
                 request.ImageUrls
             );
 
-            if (!string.IsNullOrEmpty(request.Status) && Enum.TryParse<ItemStatus>(request.Status, out var status))
+            if (!string.IsNullOrEmpty(request.Status) &&
+                Enum.TryParse<ItemStatus>(request.Status, ignoreCase: true, out var status))
             {
                 item.UpdateStatus(status);
             }
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            item = await _context.Items
-                .Include(i => i.Owner)
-                .Include(i => i.Category)
-                .Include(i => i.FavoritedBy)
-                .FirstAsync(i => i.Id == request.ItemId, cancellationToken);
-
-            return ItemDtoMapper.Map(
-                item,
-                item.FavoritedBy.Any(f => f.UserId == request.RequestingUserId)
-            );
+            return await _context.Items
+                .AsNoTracking()
+                .Where(i => i.Id == request.ItemId)
+                .Select(i => new ItemDto(
+                    i.Id,
+                    i.Title,
+                    i.Description,
+                    i.Price.Amount,
+                    i.Price.Currency,
+                    i.Status.ToString(),
+                    i.OwnerId,
+                    i.Owner != null ? i.Owner.FullName : string.Empty,
+                    i.CategoryId,
+                    i.Category != null ? i.Category.Name : string.Empty,
+                    i.AvailableFrom,
+                    i.AvailableTo,
+                    i.Location,
+                    i.ImageUrls,
+                    i.FavoritedBy.Any(f => f.UserId == request.RequestingUserId),
+                    i.FavoritedBy.Count(),
+                    i.CreatedAt,
+                    i.UpdatedAt
+                ))
+                .FirstAsync(cancellationToken);
         }
     }
 }
