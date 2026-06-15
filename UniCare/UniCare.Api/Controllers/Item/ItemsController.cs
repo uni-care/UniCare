@@ -46,6 +46,7 @@ public class ItemsController : ControllerBase
     [HttpGet("{itemId:guid}")]
     [ProducesResponseType(typeof(ItemDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [AllowAnonymous]
     public async Task<ActionResult<ItemDto>> GetItemById(Guid itemId)
     {
         try

@@ -7,8 +7,8 @@ using UniCare.Application.Category.Queries.GetAllCategories;
 namespace UniCare.API.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
-[Authorize]
+[Route("api/[controller]")]
+[AllowAnonymous]
 public class CategoriesController : ControllerBase
 {
     private readonly IMediator _mediator;
