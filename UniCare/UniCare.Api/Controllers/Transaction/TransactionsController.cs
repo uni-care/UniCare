@@ -12,7 +12,7 @@ using UniCare.Application.Transactions.Queries.GetCurrentHandoverStage;
 namespace UniCare.Api.Controllers.Transaction
 {
     [ApiController]
-    [Route("api/transactions")]
+    [Route("api/v1/transactions")]
     public class TransactionsController : ControllerBase
     {
         private readonly IMediator _mediator;

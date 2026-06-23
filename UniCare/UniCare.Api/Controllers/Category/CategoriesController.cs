@@ -7,7 +7,7 @@ using UniCare.Application.Category.Queries.GetAllCategories;
 namespace UniCare.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
 [AllowAnonymous]
 public class CategoriesController : ControllerBase
 {
