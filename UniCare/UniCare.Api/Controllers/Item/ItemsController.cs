@@ -13,6 +13,7 @@ using UniCare.Application.Item.Queries;
 using UniCare.Application.Item.Queries.GetAiRecommendations;
 using UniCare.Application.Item.Queries.GetAllItems;
 using UniCare.Application.Item.Queries.GetItemById;
+using UniCare.Application.Common;
 
 namespace UniCare.API.Controllers;
 
@@ -36,11 +37,17 @@ public class ItemsController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(List<ItemDto>), StatusCodes.Status200OK)]
     [AllowAnonymous]
-    public async Task<IActionResult> GetAllItems(CancellationToken cancellationToken)
+    public async Task<ActionResult<PaginatedResponse<ItemDto>>>  GetAllItems(CancellationToken cancellationToken,
+    [FromQuery] int pageNumber = 1,
+    [FromQuery] int pageSize = 10)
     {
-        var query = new GetAllItemsQuery();
+        var query = new GetAllItemsQuery
+        {
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
         var result = await _mediator.Send(query, cancellationToken);
-        return Ok(result);
+        return Ok(PaginatedResponse<ItemDto>.FromPaginatedList(result));
     }
 
     [HttpGet("{itemId:guid}")]

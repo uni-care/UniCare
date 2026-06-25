@@ -40,5 +40,25 @@ namespace UniCare.Infrastructure.Persistence.Repositories
                 .AsNoTracking()
                 .FirstOrDefaultAsync(i => i.Title == name, cancellationToken);
         }
+        public async Task<(List<Item> Items, int TotalCount)> GetPagedAsync(
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+        {
+            var query = _dbSet
+                .AsNoTracking()
+                .Include(i => i.Owner)
+                .Include(i => i.Category)
+                .OrderBy(i => i.Title);
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            return (items, totalCount);
+        }
     }
 }

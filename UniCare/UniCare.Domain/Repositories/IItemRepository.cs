@@ -12,5 +12,10 @@ namespace UniCare.Domain.Repositories
     {
         Task<List<Item>> GetAvailableItemsAsync(CancellationToken cancellationToken = default);
         Task<Item?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
+        //to get paged items with total count
+        Task<(List<Item> Items, int TotalCount)> GetPagedAsync(
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken = default);
     }
 }
