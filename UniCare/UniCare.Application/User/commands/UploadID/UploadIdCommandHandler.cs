@@ -19,17 +19,20 @@ namespace UniCare.Application.User.commands.UploadID
     public class UploadIdCommandHandler : IRequestHandler<UploadIdCommand, Result<UploadIdResponseDto>>
     {
         private readonly IApplicationDbContext _dbContext;
+        private readonly IStudentVerificationRepository _verificationRepository;
         private readonly UserManager<Domain.Aggregates.UserAggregates.User> _userManager;
         private readonly IOcrService _ocrService;
         private readonly IFileStorageService _fileStorage;
 
         public UploadIdCommandHandler(
             IApplicationDbContext dbContext,
+            IStudentVerificationRepository verificationRepository,
             UserManager<Domain.Aggregates.UserAggregates.User> userManager,
             IOcrService ocrService,
             IFileStorageService fileStorage)
         {
             _dbContext = dbContext;
+            _verificationRepository = verificationRepository;
             _userManager = userManager;
             _ocrService = ocrService;
             _fileStorage = fileStorage;
@@ -43,14 +46,14 @@ namespace UniCare.Application.User.commands.UploadID
             if (user is null)
                 return Result<UploadIdResponseDto>.NotFound("User not found.");
 
-            var folder = $"verifications/{request.UserId}";
+            var folder = $"unicare/verifications/{request.UserId}";
             var uploadResult = await _fileStorage.UploadAsync(
             request.FileContent, request.FileName, folder, cancellationToken);
             var documentUrl = uploadResult.Url;
             using var stream = new MemoryStream(request.FileContent);
 
             var ocrData = await _ocrService.ExtractStudentDataAsync(
-                fileStream: stream,
+                documentUrl,
                 fileName: request.FileName,
                 userId: request.UserId.ToString(),
                 docType: MapDocType(request.DocumentType));
@@ -60,13 +63,13 @@ namespace UniCare.Application.User.commands.UploadID
                 ResolveVerificationOutcome(ocrData.Verdict);
 
           
-            var verification = await _dbContext.StudentVerifications
-                .FirstOrDefaultAsync(sv => sv.UserId == request.UserId, cancellationToken);
+            var verification = await _verificationRepository.GetByUserIdAsync(
+            request.UserId, cancellationToken);
 
             if (verification is null)
             {
                 verification = new StudentVerification { UserId = request.UserId };
-                _dbContext.StudentVerifications.Add(verification);
+                _verificationRepository.Add(verification);
             }
 
             verification.DocumentType = request.DocumentType;

@@ -14,12 +14,14 @@ using System.Threading.Tasks;
 using UniCare.Application.Common.Interfaces;
 using UniCare.Application.Interfaces;
 using UniCare.Domain.Aggregates.ChatAggregate;
+using UniCare.Domain.Aggregates.ItemAggregates;
 using UniCare.Domain.Aggregates.TransactionAggregate;
 using UniCare.Domain.Aggregates.TransactionHandoverAggregate;
 using UniCare.Domain.Aggregates.UserAggregates;
 using UniCare.Domain.Interfaces;
 using UniCare.Infrastructure.Hubs;
 using UniCare.Infrastructure.Persistence;
+using UniCare.Infrastructure.Persistence.Repositories;
 using UniCare.Infrastructure.Repositories;
 using UniCare.Infrastructure.services;
 using UniCare.Infrastructure.services.Ocr;
@@ -130,6 +132,8 @@ namespace UniCare.Infrastructure
             services.AddScoped<ITransactionHandoverRepository, TransactionHandoverRepository>();
             services.AddScoped<ITransactionRepository, TransactionRepository>();
             services.AddScoped<IChatRepository, ChatRepository>();
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IItemRepository, ItemRepository>();
 
             services.AddSingleton<IPinGeneratorService, PinGeneratorService>();
 
@@ -137,6 +141,7 @@ namespace UniCare.Infrastructure
             services.AddScoped<ISignInService, SignInService>();
             services.AddScoped<IChatNotificationService, SignalRChatNotificationService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
+            services.AddScoped<IStudentVerificationRepository, StudentVerificationRepository>();
             services.AddSignalR();
 
             return services;

@@ -13,7 +13,7 @@ using UniCare.Domain.Aggregates.ChatAggregate;
 namespace UniCare.Api.Controllers.Chat
 {
     [ApiController]
-    [Route("api/chats")]
+    [Route("api/v1/chats")]
     public class ChatController : ControllerBase
     {
         private readonly ISender _sender;
