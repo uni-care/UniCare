@@ -11,12 +11,12 @@ namespace UniCare.Application.Interfaces
     {
        
         Task<UniCare.Application.User.DTOs.Verification.OcrExtractedDataDto>
-            ExtractStudentDataAsync(Stream fileStream, string fileName);
+            ExtractStudentDataAsync(string documentUrl, string fileName);
 
   
         Task<UniCare.Application.User.DTOs.Verification.OcrExtractedDataDto>
             ExtractStudentDataAsync(
-                Stream fileStream,
+                string documentUrl,
                 string fileName,
                 string userId,
                 string docType);

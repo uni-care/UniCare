@@ -5,7 +5,7 @@ using Microsoft.OpenApi.Models;
 using System.Reflection;
 using UniCare.Api.Middelware;
 using UniCare.Application;
-using UniCare.Domain.Repositories;
+using UniCare.Domain.Aggregates.ItemAggregates;
 using UniCare.Infrastructure;
 using UniCare.Infrastructure.Persistence.Repositories;
 
@@ -15,15 +15,15 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        DotNetEnv.Env.Load();
         var builder = WebApplication.CreateBuilder(args);
-
+        builder.Configuration.AddEnvironmentVariables();
         builder.Services.AddControllers();
 
         builder.Services.AddApplication();
         builder.Services.AddInfrastructure(builder.Configuration);
 
         builder.Services.AddDirectoryBrowser();
-        builder.Services.AddScoped<IItemRepository, ItemRepository>();
         builder.Services.AddCors(options =>
         {
             options.AddPolicy("MyCorsPolicy", policy =>

@@ -6,7 +6,7 @@ using UniCare.Domain.Aggregates.TransactionHandoverAggregate;
 namespace UniCare.Api.Controllers.Handover
 {
     [ApiController]
-    [Route("api/transactions/{transactionId:guid}/handover")]
+    [Route("api/v1/handover")]
     public class HandoverController : ControllerBase
     {
         private readonly ISender _sender;

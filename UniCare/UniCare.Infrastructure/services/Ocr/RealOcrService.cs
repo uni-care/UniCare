@@ -35,19 +35,19 @@ namespace UniCare.Infrastructure.services.Ocr
         }
 
         public async Task<OcrExtractedDataDto> ExtractStudentDataAsync(
-            Stream fileStream,
+            string documentUrl,
             string fileName)
         {
 
             return await ExtractStudentDataAsync(
-                fileStream, fileName,
+                documentUrl, fileName,
                 userId: string.Empty,
                 docType: "student_id");
         }
 
 
         public async Task<OcrExtractedDataDto> ExtractStudentDataAsync(
-            Stream fileStream,
+            string documentUrl,
             string fileName,
             string userId,
             string docType)
@@ -58,16 +58,10 @@ namespace UniCare.Infrastructure.services.Ocr
 
             using var form = new MultipartFormDataContent();
 
-            form.Add(new StringContent(userId), "user_id");
-
+            form.Add(new StringContent(documentUrl), "document_url");
             form.Add(new StringContent(docType), "doc_type");
 
-            var fileBytes = await ReadAllBytesAsync(fileStream);
-            var fileContent = new ByteArrayContent(fileBytes);
-            fileContent.Headers.ContentType =
-                new MediaTypeHeaderValue(ResolveMimeType(fileName));
-            //form.Add(fileContent, "file", fileName);
-
+         
             HttpResponseMessage httpResponse;
             string rawJson = string.Empty;
 
@@ -138,24 +132,6 @@ namespace UniCare.Infrastructure.services.Ocr
 
             return dto;
         }
-
-        private static async Task<byte[]> ReadAllBytesAsync(Stream stream)
-        {
-            if (stream is MemoryStream ms) return ms.ToArray();
-            using var buf = new MemoryStream();
-            await stream.CopyToAsync(buf);
-            return buf.ToArray();
-        }
-
-        private static string ResolveMimeType(string fileName) =>
-            Path.GetExtension(fileName).ToLowerInvariant() switch
-            {
-                ".jpg" or ".jpeg" => "image/jpeg",
-                ".png" => "image/png",
-                ".webp" => "image/webp",
-                ".pdf" => "application/pdf",
-                _ => "application/octet-stream"
-            };
 
         private static string? Normalise(string? value) =>
             string.IsNullOrWhiteSpace(value) ? null : value.Trim();

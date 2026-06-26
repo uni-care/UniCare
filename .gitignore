@@ -361,3 +361,14 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# =========================================================================
+# Local Settings, Environment Secrets, and Development Configurations
+# =========================================================================
+# Block local runtime settings overrides containing development credentials
+[Aa]ppsettings.[Dd]evelopment.json
+[Aa]ppsettings.[Ll]ocal.json
+
+# Block standard environment or docker secret stores
+.env
+.env.local
+.env.development

@@ -8,7 +8,7 @@ namespace UniCare.API.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-[Authorize]
+[AllowAnonymous]
 public class CategoriesController : ControllerBase
 {
     private readonly IMediator _mediator;
