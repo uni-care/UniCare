@@ -17,13 +17,13 @@ namespace UniCare.Application.Item.Queries.GetAllItems
 
         public async Task<PaginatedList<ItemDto>> Handle(GetAllItemsQuery request, CancellationToken cancellationToken)
         {
-            var (items, totalCount) = await _itemRepository.GetPagedAsync(
+            var (items, totalCount, favoritedItemIds) = await _itemRepository.GetPagedAsync(
                  request.PageNumber,
                  request.PageSize,
                  ItemStatus.Draft,
+                 request.CurrentUserId,
                  cancellationToken);
-            var dtos = items.Select(item => ItemDtoMapper.Map(item)).ToList();
-
+            var dtos = items.Select(item => ItemDtoMapper.Map(item, favoritedItemIds.Contains(item.Id))).ToList();
 
             return new PaginatedList<ItemDto>(dtos, totalCount, request.PageNumber, request.PageSize);
         }

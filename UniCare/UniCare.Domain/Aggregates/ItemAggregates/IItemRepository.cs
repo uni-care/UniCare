@@ -13,10 +13,15 @@ namespace UniCare.Domain.Aggregates.ItemAggregates
         Task<List<Item>> GetAvailableItemsAsync(CancellationToken cancellationToken = default);
         Task<Item?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
         //to get paged items with total count
-        Task<(List<Item> Items, int TotalCount)> GetPagedAsync(
+        Task<(List<Item> Items, int TotalCount, HashSet<Guid> FavoritedItemIds)> GetPagedAsync(
         int pageNumber,
         int pageSize,
         ItemStatus? excludeStatus,
+        Guid? currentUserId,
+        CancellationToken cancellationToken = default);
+        Task<(Item? Item, bool IsFavorited)> GetByIdAsync(
+        Guid itemId,
+        Guid? currentUserId,
         CancellationToken cancellationToken = default);
     }
 }

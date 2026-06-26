@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UniCare.Domain.Aggregates.ItemAggregates;
+using UniCare.Domain.Aggregates.UserAggregates;
 using UniCare.Domain.Enums;
 
 namespace UniCare.Infrastructure.Persistence.Repositories
@@ -39,10 +40,11 @@ namespace UniCare.Infrastructure.Persistence.Repositories
                 .AsNoTracking()
                 .FirstOrDefaultAsync(i => i.Title == name, cancellationToken);
         }
-        public async Task<(List<Item> Items, int TotalCount)> GetPagedAsync(
+        public async Task<(List<Item> Items, int TotalCount, HashSet<Guid> FavoritedItemIds)> GetPagedAsync(
         int pageNumber,
         int pageSize,
         ItemStatus? excludeStatus,
+        Guid? currentUserId,
         CancellationToken cancellationToken = default)
         {
             IQueryable<Item> query = _dbSet
@@ -63,8 +65,47 @@ namespace UniCare.Infrastructure.Persistence.Repositories
                 .Take(pageSize)
                 .ToListAsync(cancellationToken);
 
+            var favoritedItemIds = new HashSet<Guid>();
 
-            return (items, totalCount);
+            if (currentUserId.HasValue && items.Count > 0)
+            {
+                var itemIds = items.Select(i => i.Id).ToList();
+
+                favoritedItemIds = (await _context.Set<UserFavorite>()
+                    .AsNoTracking()
+                    .Where(f => f.UserId == currentUserId.Value && itemIds.Contains(f.ItemId))
+                    .Select(f => f.ItemId)
+                    .ToListAsync(cancellationToken))
+                    .ToHashSet();
+            }
+            return (items, totalCount, favoritedItemIds);
+        }
+        public async Task<(Item? Item, bool IsFavorited)> GetByIdAsync(
+        Guid itemId,
+        Guid? currentUserId,
+        CancellationToken cancellationToken = default)
+        {
+            var item = await _dbSet
+                .AsNoTracking()
+                .Include(i => i.Owner)
+                .Include(i => i.Category)
+                .FirstOrDefaultAsync(i => i.Id == itemId, cancellationToken);
+
+            if (item == null)
+            {
+                return (null, false);
+            }
+
+            bool isFavorited = false;
+
+            if (currentUserId.HasValue)
+            {
+                isFavorited = await _context.Set<UserFavorite>()
+                    .AsNoTracking()
+                    .AnyAsync(f => f.UserId == currentUserId.Value && f.ItemId == itemId, cancellationToken);
+            }
+
+            return (item, isFavorited);
         }
     }
 }

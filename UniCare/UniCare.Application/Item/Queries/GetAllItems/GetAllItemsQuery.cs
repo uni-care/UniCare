@@ -10,7 +10,8 @@ using UniCare.Application.Common;
 namespace UniCare.Application.Item.Queries.GetAllItems
 {
     public class GetAllItemsQuery : PaginationParams, IRequest<PaginatedList<ItemDto>>
-    { 
+    {
+        public Guid? CurrentUserId { get; set; }
     }
 
 }
