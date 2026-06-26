@@ -68,7 +68,6 @@ namespace UniCare.Api.Middelware
         }
     }
 
-    /// <summary>Extension method to register <see cref="ExceptionHandlingMiddleware"/>.</summary>
     public static class ExceptionHandlingMiddlewareExtensions
     {
         public static IApplicationBuilder UseGlobalExceptionHandler(this IApplicationBuilder app)
