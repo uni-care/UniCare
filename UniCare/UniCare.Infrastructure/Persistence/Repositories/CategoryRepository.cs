@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +15,7 @@ namespace UniCare.Infrastructure.Persistence.Repositories
         public CategoryRepository(UniCareDbContext context) : base(context)
         {
         }
+
         public override async Task<List<Category>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             return await _context.Categories

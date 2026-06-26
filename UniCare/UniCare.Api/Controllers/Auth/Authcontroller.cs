@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -71,11 +71,6 @@ namespace UniCare.Api.Controllers.Auth
 
             return ToActionResult(result);
         }
-
-        [HttpPost("google")]
-        [ProducesResponseType(typeof(ApiResponse<AuthResponseDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
-      
 
         private IActionResult ToActionResult<T>(Result<T> result, int successStatusCode = 200)
         {

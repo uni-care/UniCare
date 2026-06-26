@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -34,6 +34,7 @@ public class ItemsController : ControllerBase
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return Guid.Parse(userIdClaim!);
     }
+
     [HttpGet]
     [ProducesResponseType(typeof(List<ItemDto>), StatusCodes.Status200OK)]
     [AllowAnonymous]
@@ -52,6 +53,7 @@ public class ItemsController : ControllerBase
 
     [HttpGet("{itemId:guid}")]
     [ProducesResponseType(typeof(ItemDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [AllowAnonymous]
     public async Task<ActionResult<ItemDto>> GetItemById(Guid itemId)
@@ -75,6 +77,7 @@ public class ItemsController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(ItemDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<ItemDto>> CreateItem([FromBody] CreateItemRequest request)
     {
         var currentUserId = GetCurrentUserId();
@@ -133,9 +136,14 @@ public class ItemsController : ControllerBase
     [HttpPut("{itemId:guid}")]
     [ProducesResponseType(typeof(ItemDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<ItemDto>> UpdateItem(Guid itemId, [FromBody] UpdateItemRequest request)
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+    public async Task<ActionResult<ItemDto>> UpdateItem(
+        Guid itemId,
+        [FromBody] UpdateItemRequest request,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -156,7 +164,7 @@ public class ItemsController : ControllerBase
                 request.ImageUrls
             );
 
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command, cancellationToken);
             return Ok(result);
         }
         catch (KeyNotFoundException ex)
@@ -165,12 +173,13 @@ public class ItemsController : ControllerBase
         }
         catch (UnauthorizedAccessException ex)
         {
-            return Forbid(ex.Message);
+            return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message });
         }
     }
 
     [HttpPost("{itemId:guid}/favorite")]
     [ProducesResponseType(typeof(FavoriteResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<FavoriteResponse>> ToggleFavorite(Guid itemId)
     {
@@ -187,6 +196,7 @@ public class ItemsController : ControllerBase
             return NotFound(new { message = ex.Message });
         }
     }
+
     [ApiController]
     [Route("api/[controller]")]
     public class RecommendationsController : ControllerBase

@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -30,12 +30,6 @@ namespace UniCare.Api.Controllers.User
             return ToActionResult(result);
         }
 
-
-        [HttpPut("switch-mode")]
-        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
-       
 
         private Guid GetCurrentUserId()
             => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
