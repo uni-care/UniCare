@@ -37,14 +37,20 @@ public class ItemsController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(List<ItemDto>), StatusCodes.Status200OK)]
     [AllowAnonymous]
+    [Authorize]
     public async Task<ActionResult<PaginatedResponse<ItemDto>>>  GetAllItems(CancellationToken cancellationToken,
     [FromQuery] int pageNumber = 1,
     [FromQuery] int pageSize = 10)
     {
+        var currentUserId = User.Identity?.IsAuthenticated == true
+         ? GetCurrentUserId()
+         : (Guid?)null;
         var query = new GetAllItemsQuery
         {
             PageNumber = pageNumber,
-            PageSize = pageSize
+            PageSize = pageSize,
+            CurrentUserId = currentUserId
+
         };
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(PaginatedResponse<ItemDto>.FromPaginatedList(result));
