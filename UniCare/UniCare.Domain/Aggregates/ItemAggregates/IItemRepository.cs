@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UniCare.Domain.Common;
+using UniCare.Domain.Enums;
 
 namespace UniCare.Domain.Aggregates.ItemAggregates
 {
@@ -12,5 +13,11 @@ namespace UniCare.Domain.Aggregates.ItemAggregates
         Task<List<Item>> GetAvailableItemsAsync(CancellationToken cancellationToken = default);
         Task<Item?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
         Task<Item?> GetItemWithDetailsAsync(Guid id, CancellationToken cancellationToken = default);
+        //to get paged items with total count
+        Task<(List<Item> Items, int TotalCount)> GetPagedAsync(
+        int pageNumber,
+        int pageSize,
+        ItemStatus? excludeStatus,
+        CancellationToken cancellationToken = default);
     }
 }

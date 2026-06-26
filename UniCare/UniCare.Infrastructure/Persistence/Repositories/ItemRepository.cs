@@ -48,6 +48,33 @@ namespace UniCare.Infrastructure.Persistence.Repositories
                 .Include(i => i.Category)
                 .Include(i => i.FavoritedBy)
                 .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
+                }
+        public async Task<(List<Item> Items, int TotalCount)> GetPagedAsync(
+        int pageNumber,
+        int pageSize,
+        ItemStatus? excludeStatus,
+        CancellationToken cancellationToken = default)
+        {
+            IQueryable<Item> query = _dbSet
+                .AsNoTracking()
+                .Include(i => i.Owner)
+                .Include(i => i.Category);
+
+            if (excludeStatus.HasValue)
+            {
+                query = query.Where(i => i.Status != excludeStatus.Value);
+            }
+
+            var orderedQuery = query.OrderByDescending(i => i.CreatedAt);
+            var totalCount = await orderedQuery.CountAsync(cancellationToken);
+
+            var items = await orderedQuery
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+
+            return (items, totalCount);
         }
     }
 }
