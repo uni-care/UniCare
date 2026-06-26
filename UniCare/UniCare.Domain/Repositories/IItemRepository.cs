@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,5 +12,6 @@ namespace UniCare.Domain.Repositories
     {
         Task<List<Item>> GetAvailableItemsAsync(CancellationToken cancellationToken = default);
         Task<Item?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
+        Task<Item?> GetItemWithDetailsAsync(Guid id, CancellationToken cancellationToken = default);
     }
 }

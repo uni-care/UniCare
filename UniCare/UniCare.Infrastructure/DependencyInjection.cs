@@ -25,7 +25,8 @@ using UniCare.Infrastructure.services;
 using UniCare.Infrastructure.services.Ocr;
 using UniCare.Infrastructure.Services;
 using UniCare.Infrastructure.Settings;
-
+using UniCare.Domain.Repositories;
+using UniCare.Infrastructure.Persistence.Repositories;
 
 
 namespace UniCare.Infrastructure
@@ -127,6 +128,8 @@ namespace UniCare.Infrastructure
             services.AddScoped<ITransactionHandoverRepository, TransactionHandoverRepository>();
             services.AddScoped<ITransactionRepository, TransactionRepository>();
             services.AddScoped<IChatRepository, ChatRepository>();
+            services.AddScoped<IItemRepository, ItemRepository>();
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
 
             services.AddSingleton<IPinGeneratorService, PinGeneratorService>();
 

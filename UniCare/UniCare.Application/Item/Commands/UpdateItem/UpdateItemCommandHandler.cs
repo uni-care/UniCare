@@ -4,22 +4,24 @@ using UniCare.Application.Item.DTOs;
 using UniCare.Domain.Enums;
 using UniCare.Domain.Interfaces;
 using UniCare.Domain.VOs;
+using UniCare.Domain.Repositories;
 
 namespace UniCare.Application.Item.Commands.UpdateItem
 {
     public class UpdateItemCommandHandler : IRequestHandler<UpdateItemCommand, ItemDto>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IItemRepository _itemRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
-        public UpdateItemCommandHandler(IApplicationDbContext context)
+        public UpdateItemCommandHandler(IItemRepository itemRepository, ICategoryRepository categoryRepository)
         {
-            _context = context;
+            _itemRepository = itemRepository;
+            _categoryRepository = categoryRepository;
         }
 
         public async Task<ItemDto> Handle(UpdateItemCommand request, CancellationToken cancellationToken)
         {
-            var item = await _context.Items
-                .FirstOrDefaultAsync(i => i.Id == request.ItemId, cancellationToken);
+            var item = await _itemRepository.GetByIdAsync(request.ItemId, cancellationToken);
 
             if (item == null)
                 throw new KeyNotFoundException($"Item with ID {request.ItemId} not found.");
@@ -29,8 +31,7 @@ namespace UniCare.Application.Item.Commands.UpdateItem
 
             if (request.CategoryId.HasValue)
             {
-                var categoryExists = await _context.Categories
-                    .AnyAsync(c => c.Id == request.CategoryId.Value, cancellationToken);
+                var categoryExists = await _categoryRepository.ExistsAsync(request.CategoryId.Value, cancellationToken);
 
                 if (!categoryExists)
                     throw new KeyNotFoundException($"Category with ID {request.CategoryId.Value} not found.");
@@ -57,32 +58,30 @@ namespace UniCare.Application.Item.Commands.UpdateItem
                 item.UpdateStatus(status);
             }
 
-            await _context.SaveChangesAsync(cancellationToken);
+            await _itemRepository.UpdateAsync(item, cancellationToken);
 
-            return await _context.Items
-                .AsNoTracking()
-                .Where(i => i.Id == request.ItemId)
-                .Select(i => new ItemDto(
-                    i.Id,
-                    i.Title,
-                    i.Description,
-                    i.Price.Amount,
-                    i.Price.Currency,
-                    i.Status.ToString(),
-                    i.OwnerId,
-                    i.Owner != null ? i.Owner.FullName : string.Empty,
-                    i.CategoryId,
-                    i.Category != null ? i.Category.Name : string.Empty,
-                    i.AvailableFrom,
-                    i.AvailableTo,
-                    i.Location,
-                    i.ImageUrls,
-                    i.FavoritedBy.Any(f => f.UserId == request.RequestingUserId),
-                    i.FavoritedBy.Count(),
-                    i.CreatedAt,
-                    i.UpdatedAt
-                ))
-                .FirstAsync(cancellationToken);
+            var updatedItem = await _itemRepository.GetItemWithDetailsAsync(request.ItemId, cancellationToken);
+
+            return new ItemDto(
+                updatedItem!.Id,
+                updatedItem.Title,
+                updatedItem.Description,
+                updatedItem.Price.Amount,
+                updatedItem.Price.Currency,
+                updatedItem.Status.ToString(),
+                updatedItem.OwnerId,
+                updatedItem.Owner?.FullName ?? string.Empty,
+                updatedItem.CategoryId,
+                updatedItem.Category?.Name ?? string.Empty,
+                updatedItem.AvailableFrom,
+                updatedItem.AvailableTo,
+                updatedItem.Location,
+                updatedItem.ImageUrls,
+                updatedItem.FavoritedBy.Any(f => f.UserId == request.RequestingUserId),
+                updatedItem.FavoritedBy.Count,
+                updatedItem.CreatedAt,
+                updatedItem.UpdatedAt
+            );
         }
     }
 }

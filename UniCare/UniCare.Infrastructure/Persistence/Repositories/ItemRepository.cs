@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,6 +39,16 @@ namespace UniCare.Infrastructure.Persistence.Repositories
             return await _dbSet
                 .AsNoTracking()
                 .FirstOrDefaultAsync(i => i.Title == name, cancellationToken);
+        }
+
+        public async Task<Item?> GetItemWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .Include(i => i.Owner)
+                .Include(i => i.Category)
+                .Include(i => i.FavoritedBy)
+                .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
         }
     }
 }
