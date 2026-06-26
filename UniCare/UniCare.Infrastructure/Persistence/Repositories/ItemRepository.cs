@@ -42,20 +42,27 @@ namespace UniCare.Infrastructure.Persistence.Repositories
         public async Task<(List<Item> Items, int TotalCount)> GetPagedAsync(
         int pageNumber,
         int pageSize,
+        ItemStatus? excludeStatus,
         CancellationToken cancellationToken = default)
         {
-            var query = _dbSet
+            IQueryable<Item> query = _dbSet
                 .AsNoTracking()
                 .Include(i => i.Owner)
-                .Include(i => i.Category)
-                .OrderBy(i => i.Title);
+                .Include(i => i.Category);
 
-            var totalCount = await query.CountAsync(cancellationToken);
+            if (excludeStatus.HasValue)
+            {
+                query = query.Where(i => i.Status != excludeStatus.Value);
+            }
 
-            var items = await query
+            var orderedQuery = query.OrderByDescending(i => i.CreatedAt);
+            var totalCount = await orderedQuery.CountAsync(cancellationToken);
+
+            var items = await orderedQuery
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync(cancellationToken);
+
 
             return (items, totalCount);
         }

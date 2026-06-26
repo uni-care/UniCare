@@ -2,6 +2,7 @@
 using UniCare.Application.Common;
 using UniCare.Application.Item.DTOs;
 using UniCare.Domain.Aggregates.ItemAggregates;
+using UniCare.Domain.Enums;
 
 namespace UniCare.Application.Item.Queries.GetAllItems
 {
@@ -19,6 +20,7 @@ namespace UniCare.Application.Item.Queries.GetAllItems
             var (items, totalCount) = await _itemRepository.GetPagedAsync(
                  request.PageNumber,
                  request.PageSize,
+                 ItemStatus.Draft,
                  cancellationToken);
             var dtos = items.Select(item => ItemDtoMapper.Map(item)).ToList();
 
