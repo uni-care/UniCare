@@ -40,7 +40,6 @@ public class ItemsController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(List<ItemDto>), StatusCodes.Status200OK)]
     [AllowAnonymous]
-    [Authorize]
     public async Task<ActionResult<PaginatedResponse<ItemDto>>>  GetAllItems(CancellationToken cancellationToken,
     [FromQuery] int pageNumber = 1,
     [FromQuery] int pageSize = 10)
