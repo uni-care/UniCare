@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using UniCare.Api.Models;
+using UniCare.Application.Common;
+using UniCare.Application.Common.Interfaces;
 using UniCare.Application.Item.Commands;
 using UniCare.Application.Item.Commands.CreateItem;
 using UniCare.Application.Item.Commands.ToggleFavorite;
@@ -13,7 +15,6 @@ using UniCare.Application.Item.Queries;
 using UniCare.Application.Item.Queries.GetAiRecommendations;
 using UniCare.Application.Item.Queries.GetAllItems;
 using UniCare.Application.Item.Queries.GetItemById;
-using UniCare.Application.Common;
 
 namespace UniCare.API.Controllers;
 
@@ -23,10 +24,12 @@ namespace UniCare.API.Controllers;
 public class ItemsController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly ICurrentUserService _currentUserService;
 
-    public ItemsController(IMediator mediator)
+    public ItemsController(IMediator mediator, ICurrentUserService currentUserService)
     {
         _mediator = mediator;
+        _currentUserService = currentUserService;
     }
 
     private Guid GetCurrentUserId()
@@ -37,19 +40,15 @@ public class ItemsController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(List<ItemDto>), StatusCodes.Status200OK)]
     [AllowAnonymous]
-    [Authorize]
     public async Task<ActionResult<PaginatedResponse<ItemDto>>>  GetAllItems(CancellationToken cancellationToken,
     [FromQuery] int pageNumber = 1,
     [FromQuery] int pageSize = 10)
     {
-        var currentUserId = User.Identity?.IsAuthenticated == true
-         ? GetCurrentUserId()
-         : (Guid?)null;
         var query = new GetAllItemsQuery
         {
             PageNumber = pageNumber,
             PageSize = pageSize,
-            CurrentUserId = currentUserId
+            CurrentUserId = _currentUserService.UserId
 
         };
         var result = await _mediator.Send(query, cancellationToken);
@@ -64,11 +63,8 @@ public class ItemsController : ControllerBase
     {
         try
         {
-            var currentUserId = User.Identity?.IsAuthenticated == true
-                ? GetCurrentUserId()
-                : (Guid?)null;
-
-            var query = new GetItemByIdQuery(itemId, currentUserId);
+            
+            var query = new GetItemByIdQuery(itemId, _currentUserService.UserId);
             var result = await _mediator.Send(query);
             return Ok(result);
         }
@@ -101,6 +97,9 @@ public class ItemsController : ControllerBase
         var result = await _mediator.Send(command);
         return CreatedAtAction(nameof(GetItemById), new { itemId = result.Id }, result);
     }
+
+
+
     [HttpPost("{itemId:guid}/images")]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(typeof(UploadItemImageResult), StatusCodes.Status201Created)]
