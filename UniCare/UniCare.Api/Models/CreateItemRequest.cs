@@ -1,9 +1,12 @@
-﻿namespace UniCare.Api.Models
+﻿using UniCare.Domain.Enums;
+
+namespace UniCare.Api.Models
 {
     public record CreateItemRequest(
     string Title,
     string Description,
     decimal Price,
+    ItemType ItemType,
     string Currency,
     Guid CategoryId,
     DateTime? AvailableFrom,

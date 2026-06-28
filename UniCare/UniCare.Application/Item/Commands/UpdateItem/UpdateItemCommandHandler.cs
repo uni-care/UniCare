@@ -49,6 +49,7 @@ namespace UniCare.Application.Item.Commands.UpdateItem
                 request.Title,
                 request.Description,
                 price,
+                request.ItemType,
                 request.CategoryId,
                 request.AvailableFrom,
                 request.AvailableTo,

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UniCare.Application.Item.DTOs;
+using UniCare.Domain.Enums;
 
 namespace UniCare.Application.Item.Commands.UpdateItem
 {
@@ -14,6 +15,7 @@ namespace UniCare.Application.Item.Commands.UpdateItem
     string? Title,
     string? Description,
     decimal? Price,
+    ItemType? ItemType,
     string? Currency,
     Guid? CategoryId,
     string? Status,

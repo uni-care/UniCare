@@ -38,6 +38,10 @@ namespace UniCare.Infrastructure.Persistence.Configurations
                     .IsRequired();
             });
 
+            builder.Property(i => i.ItemType)
+            .HasConversion<int>()
+            .IsRequired();
+
             builder.Property(i => i.Status)
                 .HasConversion<string>()
                 .HasMaxLength(50)

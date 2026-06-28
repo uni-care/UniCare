@@ -26,6 +26,13 @@ namespace UniCare.Application.Item.Commands.UpdateItem
                 .GreaterThan(0).WithMessage("Price must be greater than 0.")
                 .When(x => x.Price.HasValue);
 
+            When(x => x.ItemType.HasValue, () =>
+            {
+                RuleFor(x => x.ItemType!.Value)
+                    .IsInEnum()
+                    .WithMessage("ItemType must be either ForSale or ForRent.");
+            });
+
             RuleFor(x => x.Currency)
                 .Length(3).WithMessage("Currency must be 3 characters.")
                 .When(x => !string.IsNullOrEmpty(x.Currency));

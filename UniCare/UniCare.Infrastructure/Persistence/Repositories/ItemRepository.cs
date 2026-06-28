@@ -43,6 +43,7 @@ namespace UniCare.Infrastructure.Persistence.Repositories
         public async Task<(List<Item> Items, int TotalCount, HashSet<Guid> FavoritedItemIds)> GetPagedAsync(
         int pageNumber,
         int pageSize,
+        ItemType? itemType,
         ItemStatus? excludeStatus,
         Guid? currentUserId,
         CancellationToken cancellationToken = default)
@@ -57,6 +58,10 @@ namespace UniCare.Infrastructure.Persistence.Repositories
                 query = query.Where(i => i.Status != excludeStatus.Value);
             }
 
+            if (itemType.HasValue)
+            {
+                query = query.Where(i => i.ItemType == itemType.Value);
+            }
             var orderedQuery = query.OrderByDescending(i => i.CreatedAt);
             var totalCount = await orderedQuery.CountAsync(cancellationToken);
 
@@ -78,6 +83,7 @@ namespace UniCare.Infrastructure.Persistence.Repositories
                     .ToListAsync(cancellationToken))
                     .ToHashSet();
             }
+
             return (items, totalCount, favoritedItemIds);
         }
         public async Task<(Item? Item, bool IsFavorited)> GetByIdAsync(
