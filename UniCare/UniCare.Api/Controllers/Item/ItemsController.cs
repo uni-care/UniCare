@@ -15,6 +15,7 @@ using UniCare.Application.Item.Queries;
 using UniCare.Application.Item.Queries.GetAiRecommendations;
 using UniCare.Application.Item.Queries.GetAllItems;
 using UniCare.Application.Item.Queries.GetItemById;
+using UniCare.Domain.Enums;
 
 namespace UniCare.API.Controllers;
 
@@ -41,6 +42,7 @@ public class ItemsController : ControllerBase
     [ProducesResponseType(typeof(List<ItemDto>), StatusCodes.Status200OK)]
     [AllowAnonymous]
     public async Task<ActionResult<PaginatedResponse<ItemDto>>>  GetAllItems(CancellationToken cancellationToken,
+    [FromQuery] ItemType? itemType,
     [FromQuery] int pageNumber = 1,
     [FromQuery] int pageSize = 10)
     {
@@ -48,6 +50,7 @@ public class ItemsController : ControllerBase
         {
             PageNumber = pageNumber,
             PageSize = pageSize,
+            ItemType = itemType,
             CurrentUserId = _currentUserService.UserId
 
         };
@@ -85,6 +88,7 @@ public class ItemsController : ControllerBase
             request.Title,
             request.Description,
             request.Price,
+            request.ItemType,
             request.Currency,
             request.CategoryId,
             request.AvailableFrom,
@@ -152,6 +156,7 @@ public class ItemsController : ControllerBase
                 request.Title,
                 request.Description,
                 request.Price,
+                request.ItemType,
                 request.Currency,
                 request.CategoryId,
                 request.Status,

@@ -20,6 +20,7 @@ namespace UniCare.Application.Item.Queries.GetAllItems
             var (items, totalCount, favoritedItemIds) = await _itemRepository.GetPagedAsync(
                  request.PageNumber,
                  request.PageSize,
+                 request.ItemType,
                  ItemStatus.Draft,
                  request.CurrentUserId,
                  cancellationToken);

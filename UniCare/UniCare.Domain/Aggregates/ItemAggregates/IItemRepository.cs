@@ -16,6 +16,7 @@ namespace UniCare.Domain.Aggregates.ItemAggregates
         Task<(List<Item> Items, int TotalCount, HashSet<Guid> FavoritedItemIds)> GetPagedAsync(
         int pageNumber,
         int pageSize,
+        ItemType? itemType,
         ItemStatus? excludeStatus,
         Guid? currentUserId,
         CancellationToken cancellationToken = default);

@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using UniCare.Application.Item.DTOs;
 using UniCare.Domain.Interfaces;
 using UniCare.Domain.VOs;
+using UniCare.Application.Common.Exceptions;
+
 
 namespace UniCare.Application.Item.Commands.CreateItem
 {
@@ -19,9 +21,9 @@ namespace UniCare.Application.Item.Commands.CreateItem
         {
             var categoryExists = await _context.Categories
                 .AnyAsync(c => c.Id == request.CategoryId, cancellationToken);
-
+            Console.WriteLine($"Looking for CategoryId: {request.CategoryId}");
             if (!categoryExists)
-                throw new KeyNotFoundException($"Category with ID {request.CategoryId} not found.");
+                throw new NotFoundException(nameof(Category), request.CategoryId);
 
             var price = Money.Create(request.Price, request.Currency);
 
@@ -29,6 +31,7 @@ namespace UniCare.Application.Item.Commands.CreateItem
                 request.Title,
                 request.Description,
                 price,
+                request.ItemType,
                 request.OwnerId,
                 request.CategoryId,
                 request.AvailableFrom,

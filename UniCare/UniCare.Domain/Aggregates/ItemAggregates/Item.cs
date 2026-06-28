@@ -17,6 +17,7 @@ namespace UniCare.Domain.Aggregates.ItemAggregates
         public string Description { get; private set; }
         public Money Price { get; private set; }
         public ItemStatus Status { get; private set; }
+        public ItemType ItemType { get; private set; }
         public Guid OwnerId { get; private set; }
         public Guid CategoryId { get; private set; }
         public DateTime? AvailableFrom { get; private set; }
@@ -35,6 +36,7 @@ namespace UniCare.Domain.Aggregates.ItemAggregates
             string title,
             string description,
             Money price,
+            ItemType itemType,
             Guid ownerId,
             Guid categoryId,
             DateTime? availableFrom = null,
@@ -48,6 +50,7 @@ namespace UniCare.Domain.Aggregates.ItemAggregates
                 Title = title,
                 Description = description,
                 Price = price,
+                ItemType = itemType,
                 Status = ItemStatus.Draft,
                 OwnerId = ownerId,
                 CategoryId = categoryId,
@@ -66,6 +69,7 @@ namespace UniCare.Domain.Aggregates.ItemAggregates
             string? title = null,
             string? description = null,
             Money? price = null,
+            ItemType? itemType = null,
             Guid? categoryId = null,
             DateTime? availableFrom = null,
             DateTime? availableTo = null,
@@ -75,6 +79,7 @@ namespace UniCare.Domain.Aggregates.ItemAggregates
             if (!string.IsNullOrWhiteSpace(title)) Title = title;
             if (!string.IsNullOrWhiteSpace(description)) Description = description;
             if (price != null) Price = price;
+            if (itemType.HasValue) ItemType = itemType.Value;
             if (categoryId.HasValue) CategoryId = categoryId.Value;
             if (availableFrom.HasValue) AvailableFrom = availableFrom;
             if (availableTo.HasValue) AvailableTo = availableTo;

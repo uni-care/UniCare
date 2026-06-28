@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using UniCare.Application.Item.DTOs;
+using UniCare.Domain.Enums;
 
 namespace UniCare.Application.Item.Commands.CreateItem
 {
@@ -7,6 +8,7 @@ namespace UniCare.Application.Item.Commands.CreateItem
         string Title,
         string Description,
         decimal Price,
+        ItemType ItemType,
         string Currency,
         Guid CategoryId,
         DateTime? AvailableFrom,

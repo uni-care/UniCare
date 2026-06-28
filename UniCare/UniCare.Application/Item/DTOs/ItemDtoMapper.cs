@@ -9,6 +9,7 @@ public static class ItemDtoMapper
             item.Description,
             item.Price.Amount,
             item.Price.Currency,
+            (int)item.ItemType,
             item.Status.ToString(),
             item.OwnerId,
             item.Owner?.FullName ?? string.Empty,
