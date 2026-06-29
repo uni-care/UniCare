@@ -44,13 +44,20 @@ public class ItemsController : ControllerBase
     public async Task<ActionResult<PaginatedResponse<ItemDto>>>  GetAllItems(CancellationToken cancellationToken,
     [FromQuery] ItemType? itemType,
     [FromQuery] int pageNumber = 1,
-    [FromQuery] int pageSize = 10)
+    [FromQuery] int pageSize = 10,
+    [FromQuery] Guid? categoryId = null,
+    [FromQuery] bool? isFree = null,
+    [FromQuery] bool? availableOnly = null)
+
     {
         var query = new GetAllItemsQuery
         {
             PageNumber = pageNumber,
             PageSize = pageSize,
             ItemType = itemType,
+            CategoryId = categoryId,
+            IsFree = isFree,
+            AvailableOnly = availableOnly,
             CurrentUserId = _currentUserService.UserId
 
         };
