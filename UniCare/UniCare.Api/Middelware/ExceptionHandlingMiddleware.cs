@@ -2,6 +2,7 @@ using System.Net;
 using System.Text.Json;
 using UniCare.Application.Common;
 using FluentValidation;
+using UniCare.Application.Common.Exceptions;
 
 namespace UniCare.Api.Middelware
 {
@@ -41,6 +42,11 @@ namespace UniCare.Api.Middelware
             {
                 _logger.LogWarning(ex, "Unauthorized access.");
                 await WriteErrorAsync(context, HttpStatusCode.Unauthorized, ex.Message, "UNAUTHORIZED");
+            }
+            catch (NotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Entity not found.");
+                await WriteErrorAsync(context, HttpStatusCode.NotFound, ex.Message, "NOT_FOUND");
             }
             catch (Exception ex)
             {

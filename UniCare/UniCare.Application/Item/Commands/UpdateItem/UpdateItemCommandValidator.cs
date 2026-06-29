@@ -50,6 +50,13 @@ namespace UniCare.Application.Item.Commands.UpdateItem
                 .When(x => !x.Price.HasValue && !string.IsNullOrWhiteSpace(x.Currency))
                 .OverridePropertyName("Price");
 
+            When(x => x.ItemType.HasValue, () =>
+            {
+                RuleFor(x => x.ItemType!.Value)
+                    .IsInEnum()
+                    .WithMessage("ItemType must be either ForSale or ForRent.");
+            });
+
             RuleFor(x => x.Currency)
                 .Length(3)
                 .WithMessage("Currency must be a 3-letter ISO code (e.g., USD, EUR, EGP).")

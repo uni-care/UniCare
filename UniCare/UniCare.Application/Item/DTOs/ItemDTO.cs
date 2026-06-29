@@ -12,6 +12,7 @@ namespace UniCare.Application.Item.DTOs
     string Description,
     decimal Price,
     string Currency,
+    int ItemType,
     string Status,
     Guid OwnerId,
     string OwnerName,
