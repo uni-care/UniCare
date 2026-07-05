@@ -23,6 +23,9 @@ namespace UniCare.Application.Item.Queries.GetAllItems
                  request.ItemType,
                  ItemStatus.Draft,
                  request.CurrentUserId,
+                 request.CategoryId,
+                 request.IsFree,
+                 request.AvailableOnly,
                  cancellationToken);
             var dtos = items.Select(item => ItemDtoMapper.Map(item, favoritedItemIds.Contains(item.Id))).ToList();
 

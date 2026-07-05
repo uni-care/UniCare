@@ -14,7 +14,9 @@ namespace UniCare.Application.Item.Queries.GetAllItems
     {
         public Guid? CurrentUserId { get; set; }
         public ItemType? ItemType { get; set; } 
-
-    }
+        public Guid? CategoryId { get; set; }
+        public bool? IsFree { get; set; }
+        public bool? AvailableOnly { get; set; } 
+     }
 
 }

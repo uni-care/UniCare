@@ -46,6 +46,9 @@ namespace UniCare.Infrastructure.Persistence.Repositories
         ItemType? itemType,
         ItemStatus? excludeStatus,
         Guid? currentUserId,
+        Guid? categoryId,
+        bool? isFree,
+        bool? availableOnly,
         CancellationToken cancellationToken = default)
         {
             IQueryable<Item> query = _dbSet
@@ -61,6 +64,18 @@ namespace UniCare.Infrastructure.Persistence.Repositories
             if (itemType.HasValue)
             {
                 query = query.Where(i => i.ItemType == itemType.Value);
+            }
+            if (categoryId.HasValue)
+            {
+                query = query.Where(i => i.CategoryId == categoryId.Value);
+            }
+            if (isFree == true)
+            {
+                query = query.Where(i => EF.Property<decimal>(i.Price, "Amount") == 0m);
+            }
+            if (availableOnly.HasValue) {
+                
+                query = query.Where(i => i.Status == ItemStatus.Available);
             }
             var orderedQuery = query.OrderByDescending(i => i.CreatedAt);
             var totalCount = await orderedQuery.CountAsync(cancellationToken);

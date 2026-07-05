@@ -37,7 +37,9 @@ namespace UniCare.Infrastructure.Persistence
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+
             base.OnModelCreating(builder); // MUST be called first for Identity tables
+            builder.ApplyConfigurationsFromAssembly(typeof(UniCareDbContext).Assembly);
 
             // ── TransactionHandover ───────────────────────────────────────────
             builder.Entity<TransactionHandover>(entity =>
@@ -238,13 +240,7 @@ namespace UniCare.Infrastructure.Persistence
                       .IsRequired()
                       .HasMaxLength(2000);
 
-                entity.Property(e => e.Price)
-    .HasConversion(
-        money => money != null ? $"{money.Amount}:{money.Currency}" : null,
-        dbValue => ParseMoneyStatic(dbValue) // Requires a static helper or logic inline
-    )
-    .HasColumnType("nvarchar(50)")
-    .IsRequired();
+                
 
                 entity.Property(e => e.Status)
                       .HasConversion<int>()
@@ -363,19 +359,6 @@ namespace UniCare.Infrastructure.Persistence
             builder.Entity<IdentityUserLogin<Guid>>().ToTable("UniCare_UserLogins");
             builder.Entity<IdentityRoleClaim<Guid>>().ToTable("UniCare_RoleClaims");
             builder.Entity<IdentityUserToken<Guid>>().ToTable("UniCare_UserTokens");
-        }
-        private static Money ParseMoneyStatic(string dbValue)
-        {
-            if (string.IsNullOrWhiteSpace(dbValue))
-                return Money.Create(0, "USD");
-
-            var parts = dbValue.Split(':');
-            if (parts.Length == 2 && decimal.TryParse(parts[0], out var amount))
-            {
-                return Money.Create(amount, parts[1]);
-            }
-
-            return Money.Create(0, "USD");
         }
     }
 }
