@@ -1,0 +1,31 @@
+name: .NET CI
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        cache: true
+        cache-dependency-path: UniCare/UniCare.sln
+
+    - name: Restore dependencies
+      run: dotnet restore UniCare/UniCare.sln
+
+    - name: Build solution
+      run: dotnet build UniCare/UniCare.sln --no-restore --configuration Release
+
+    - name: Test solution
+      run: dotnet test UniCare/UniCare.sln --no-build --configuration Release

@@ -20,6 +20,9 @@ namespace UniCare.Domain.Aggregates.ItemAggregates
         ItemType? itemType,
         ItemStatus? excludeStatus,
         Guid? currentUserId,
+        Guid? categoryId,
+        bool? isFree,
+        bool? availableOnly,
         CancellationToken cancellationToken = default);
         Task<(Item? Item, bool IsFavorited)> GetByIdAsync(
         Guid itemId,
