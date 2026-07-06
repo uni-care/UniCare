@@ -38,18 +38,6 @@ namespace UniCare.Application.Item.Commands.UpdateItem
                 .WithMessage("Price must not exceed 1,000,000.")
                 .When(x => x.Price.HasValue);
 
-            RuleFor(x => x)
-                .Must(x => x.Price.HasValue && !string.IsNullOrWhiteSpace(x.Currency))
-                .WithMessage("Currency is required when providing a Price.")
-                .When(x => x.Price.HasValue && string.IsNullOrWhiteSpace(x.Currency))
-                .OverridePropertyName("Currency");
-
-            RuleFor(x => x)
-                .Must(x => !x.Price.HasValue && string.IsNullOrWhiteSpace(x.Currency))
-                .WithMessage("Price is required when providing a Currency.")
-                .When(x => !x.Price.HasValue && !string.IsNullOrWhiteSpace(x.Currency))
-                .OverridePropertyName("Price");
-
             When(x => x.ItemType.HasValue, () =>
             {
                 RuleFor(x => x.ItemType!.Value)

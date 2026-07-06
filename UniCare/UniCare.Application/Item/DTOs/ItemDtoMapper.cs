@@ -1,3 +1,5 @@
+using UniCare.Domain.Aggregates.UserAggregates;
+
 namespace UniCare.Application.Item.DTOs;
 
 public static class ItemDtoMapper
@@ -24,4 +26,27 @@ public static class ItemDtoMapper
             item.CreatedAt,
             item.UpdatedAt
         );
+    public static FavoriteItemDto MapToFavoriteDto(UserFavorite favorite)
+    {
+        var item = favorite.Item;
+        return new FavoriteItemDto(
+            item.Id,
+            item.Title,
+            item.Description,
+            item.Price.Amount,
+            item.Price.Currency,
+            item.Status.ToString(),
+            item.OwnerId,
+            item.Owner != null ? item.Owner.FullName : string.Empty,
+            item.CategoryId,
+            item.Category != null ? item.Category.Name : string.Empty,
+            item.AvailableFrom,
+            item.AvailableTo,
+            item.Location,
+            item.ImageUrls,
+            favorite.CreatedAt,
+            item.CreatedAt,
+            item.UpdatedAt
+        );
+    }
 }

@@ -15,7 +15,6 @@ public record FavoriteItemDto(
     DateTime? AvailableTo,
     string? Location,
     List<string> ImageUrls,
-    int FavoriteCount,
     DateTime DateAddedToFavorites,
     DateTime ItemCreatedAt,
     DateTime ItemUpdatedAt

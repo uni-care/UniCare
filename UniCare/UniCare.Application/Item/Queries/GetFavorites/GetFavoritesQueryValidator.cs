@@ -9,6 +9,10 @@ public class GetFavoritesQueryValidator : AbstractValidator<GetFavoritesQuery>
 
     public GetFavoritesQueryValidator()
     {
+        RuleFor(x => x.UserId)
+        .NotEmpty()
+        .WithMessage("User id is required.");
+
         RuleFor(x => x.PageNumber)
             .GreaterThanOrEqualTo(1)
             .WithMessage("Page number must be at least 1.");
@@ -17,22 +21,8 @@ public class GetFavoritesQueryValidator : AbstractValidator<GetFavoritesQuery>
             .InclusiveBetween(1, 100)
             .WithMessage("Page size must be between 1 and 100.");
 
-        RuleFor(x => x.MinPrice)
-            .GreaterThanOrEqualTo(0)
-            .When(x => x.MinPrice.HasValue)
-            .WithMessage("Minimum price must be non-negative.");
-
-        RuleFor(x => x.MaxPrice)
-            .GreaterThanOrEqualTo(0)
-            .When(x => x.MaxPrice.HasValue)
-            .WithMessage("Maximum price must be non-negative.");
-
-        RuleFor(x => x)
-            .Must(x => !x.MinPrice.HasValue || !x.MaxPrice.HasValue || x.MinPrice <= x.MaxPrice)
-            .WithMessage("Minimum price must not exceed maximum price.");
-
         RuleFor(x => x.SortBy)
-            .Must(s => AllowedSortByFields.Contains(s.ToLowerInvariant()))
+            .Must(s => AllowedSortByFields.Contains(s))
             .WithMessage($"Sort by must be one of: {string.Join(", ", AllowedSortByFields)}.");
 
         RuleFor(x => x.SortDirection)

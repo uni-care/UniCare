@@ -1,10 +1,9 @@
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using UniCare.Application.Item.DTOs;
+using UniCare.Domain.Aggregates.ItemAggregates;
 using UniCare.Domain.Enums;
 using UniCare.Domain.Interfaces;
 using UniCare.Domain.VOs;
-using UniCare.Domain.Repositories;
 
 namespace UniCare.Application.Item.Commands.UpdateItem
 {
@@ -22,7 +21,6 @@ namespace UniCare.Application.Item.Commands.UpdateItem
         public async Task<ItemDto> Handle(UpdateItemCommand request, CancellationToken cancellationToken)
         {
             var item = await _itemRepository.GetByIdAsync(request.ItemId, cancellationToken);
-
             if (item == null)
                 throw new KeyNotFoundException($"Item with ID {request.ItemId} not found.");
 
@@ -32,14 +30,18 @@ namespace UniCare.Application.Item.Commands.UpdateItem
             if (request.CategoryId.HasValue)
             {
                 var categoryExists = await _categoryRepository.ExistsAsync(request.CategoryId.Value, cancellationToken);
-
                 if (!categoryExists)
                     throw new KeyNotFoundException($"Category with ID {request.CategoryId.Value} not found.");
             }
 
             Money? price = null;
-            if (request.Price.HasValue && !string.IsNullOrWhiteSpace(request.Currency))
-                price = Money.Create(request.Price.Value, request.Currency);
+            if (request.Price.HasValue)
+            {
+                var currency = !string.IsNullOrWhiteSpace(request.Currency)
+                    ? request.Currency
+                    : item.Price.Currency;
+                price = Money.Create(request.Price.Value, currency);
+            }
 
             item.Update(
                 request.Title,
@@ -63,26 +65,9 @@ namespace UniCare.Application.Item.Commands.UpdateItem
 
             var updatedItem = await _itemRepository.GetItemWithDetailsAsync(request.ItemId, cancellationToken);
 
-            return new ItemDto(
-                updatedItem!.Id,
-                updatedItem.Title,
-                updatedItem.Description,
-                updatedItem.Price.Amount,
-                updatedItem.Price.Currency,
-                updatedItem.Status.ToString(),
-                updatedItem.OwnerId,
-                updatedItem.Owner?.FullName ?? string.Empty,
-                updatedItem.CategoryId,
-                updatedItem.Category?.Name ?? string.Empty,
-                updatedItem.AvailableFrom,
-                updatedItem.AvailableTo,
-                updatedItem.Location,
-                updatedItem.ImageUrls,
-                updatedItem.FavoritedBy.Any(f => f.UserId == request.RequestingUserId),
-                updatedItem.FavoritedBy.Count,
-                updatedItem.CreatedAt,
-                updatedItem.UpdatedAt
-            );
+            var isFavorited = updatedItem!.FavoritedBy.Any(f => f.UserId == request.RequestingUserId);
+
+            return ItemDtoMapper.Map(updatedItem, isFavorited);
         }
     }
 }

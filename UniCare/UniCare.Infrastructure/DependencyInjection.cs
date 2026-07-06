@@ -27,8 +27,6 @@ using UniCare.Infrastructure.services;
 using UniCare.Infrastructure.services.Ocr;
 using UniCare.Infrastructure.Services;
 using UniCare.Infrastructure.Settings;
-using UniCare.Domain.Repositories;
-using UniCare.Infrastructure.Persistence.Repositories;
 
 
 namespace UniCare.Infrastructure

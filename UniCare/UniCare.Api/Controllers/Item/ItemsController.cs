@@ -14,6 +14,7 @@ using UniCare.Application.Item.DTOs;
 using UniCare.Application.Item.Queries;
 using UniCare.Application.Item.Queries.GetAiRecommendations;
 using UniCare.Application.Item.Queries.GetAllItems;
+using UniCare.Application.Item.Queries.GetFavorites;
 using UniCare.Application.Item.Queries.GetItemById;
 using UniCare.Domain.Enums;
 
@@ -149,7 +150,7 @@ public class ItemsController : ControllerBase
             };
     }
 
-    [HttpPut("{itemId:guid}")]
+    [HttpPatch("{itemId:guid}")]
     [ProducesResponseType(typeof(ItemDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -157,14 +158,13 @@ public class ItemsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     public async Task<ActionResult<ItemDto>> UpdateItem(
-        Guid itemId,
-        [FromBody] UpdateItemRequest request,
-        CancellationToken cancellationToken)
+    Guid itemId,
+    [FromBody] UpdateItemRequest request,
+    CancellationToken cancellationToken)
     {
         try
         {
             var currentUserId = GetCurrentUserId();
-
             var command = new UpdateItemCommand(
                 itemId,
                 currentUserId,
@@ -180,7 +180,6 @@ public class ItemsController : ControllerBase
                 request.Location,
                 request.ImageUrls
             );
-
             var result = await _mediator.Send(command, cancellationToken);
             return Ok(result);
         }
@@ -229,5 +228,29 @@ public class ItemsController : ControllerBase
             var result = await _mediator.Send(new GetAiRecommendationsQuery(prompt));
             return Ok(result);
         }
+    }
+    [HttpGet("favorites")]
+    [Authorize]
+    [ProducesResponseType(typeof(ApiResponse<PaginatedResponse<FavoriteItemDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetFavorites(
+    [FromQuery] int pageNumber = 1,
+    [FromQuery] int pageSize = 10,
+    [FromQuery] Guid? categoryId = null,
+    [FromQuery] string sortBy = "dateAdded",
+    [FromQuery] string sortDirection = "desc",
+    CancellationToken cancellationToken = default)
+    {
+        var query = new GetFavoritesQuery
+        {
+            UserId = _currentUserService.UserId!.Value,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            CategoryId = categoryId,
+            SortBy = sortBy,
+            SortDirection = sortDirection
+        };
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(PaginatedResponse<FavoriteItemDto>.FromPaginatedList(result));
     }
 }

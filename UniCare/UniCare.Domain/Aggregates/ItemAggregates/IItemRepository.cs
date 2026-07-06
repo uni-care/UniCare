@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UniCare.Domain.Aggregates.UserAggregates;
 using UniCare.Domain.Common;
 using UniCare.Domain.Enums;
 
@@ -28,5 +29,13 @@ namespace UniCare.Domain.Aggregates.ItemAggregates
         Guid itemId,
         Guid? currentUserId,
         CancellationToken cancellationToken = default);
+        Task<(List<UserFavorite> Favorites, int TotalCount)> GetFavoritesPagedAsync(
+        Guid userId,
+        Guid? categoryId,
+        string sortBy,
+        bool descending,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken);
     }
 }
