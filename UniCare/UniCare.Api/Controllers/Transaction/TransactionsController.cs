@@ -4,6 +4,7 @@ using UniCare.Api.Controllers.Transaction.Requests;
 using UniCare.Application.Common.Interfaces;
 using UniCare.Application.Handover.Commands.GenerateHandover;
 using UniCare.Application.Transactions.Commands.CreateTransaction;
+using UniCare.Application.Transactions.Commands.RespondToTransaction;
 using UniCare.Application.Transactions.Queries;
 using UniCare.Application.Transactions.Queries.GetActiveTransactions;
 using UniCare.Application.Transactions.Queries.GetAllTransactions;
@@ -46,6 +47,40 @@ namespace UniCare.Api.Controllers.Transaction
                 : BadRequest(new { error = result.ErrorMessage });
         }
 
+
+        /// Owner approves or declines a pending transaction request.
+        /// Approve -> status becomes AwaitingHandover. Decline -> status becomes Cancelled.
+        [HttpPost("{id:guid}/respond")]
+        [ProducesResponseType(typeof(RespondToTransactionResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> Respond(
+            Guid id,
+            [FromBody] RespondToTransactionRequest request,
+            CancellationToken ct)
+        {
+            Guid userId = _currentUserService.UserId ?? throw new UnauthorizedAccessException();
+
+            var command = new RespondToTransactionCommand(
+                TransactionId: id,
+                RespondingUserId: userId,
+                IsApproved: request.IsApproved);
+
+            var result = await _mediator.Send(command, ct);
+
+            if (result.IsSuccess)
+                return Ok(result.Data);
+
+            return result.StatusCode switch
+            {
+                404 => NotFound(new { error = result.ErrorMessage }),
+                403 => StatusCode(StatusCodes.Status403Forbidden, new { error = result.ErrorMessage }),
+                409 => Conflict(new { error = result.ErrorMessage }),
+                _ => BadRequest(new { error = result.ErrorMessage })
+            };
+        }
 
 
         [HttpGet("{id:guid}/code")]
