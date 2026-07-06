@@ -54,7 +54,7 @@ namespace UniCare.Api.Middelware
                 await WriteErrorAsync(
                     context,
                     HttpStatusCode.InternalServerError,
-                    $"An unexpected error occurred: {ex.Message}. Details: {ex.InnerException?.Message}. Stack: {ex.StackTrace}",
+                    "An unexpected error occurred. Please try again later.",
                     "INTERNAL_SERVER_ERROR");
             }
         }
