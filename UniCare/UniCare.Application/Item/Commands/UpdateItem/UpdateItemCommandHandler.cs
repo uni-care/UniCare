@@ -1,6 +1,6 @@
-﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
+using MediatR;
 using UniCare.Application.Item.DTOs;
+using UniCare.Domain.Aggregates.ItemAggregates;
 using UniCare.Domain.Enums;
 using UniCare.Domain.Interfaces;
 using UniCare.Domain.VOs;
@@ -9,21 +9,18 @@ namespace UniCare.Application.Item.Commands.UpdateItem
 {
     public class UpdateItemCommandHandler : IRequestHandler<UpdateItemCommand, ItemDto>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IItemRepository _itemRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
-        public UpdateItemCommandHandler(IApplicationDbContext context)
+        public UpdateItemCommandHandler(IItemRepository itemRepository, ICategoryRepository categoryRepository)
         {
-            _context = context;
+            _itemRepository = itemRepository;
+            _categoryRepository = categoryRepository;
         }
 
         public async Task<ItemDto> Handle(UpdateItemCommand request, CancellationToken cancellationToken)
         {
-            var item = await _context.Items
-                .Include(i => i.Owner)
-                .Include(i => i.Category)
-                .Include(i => i.FavoritedBy)
-                .FirstOrDefaultAsync(i => i.Id == request.ItemId, cancellationToken);
-
+            var item = await _itemRepository.GetByIdAsync(request.ItemId, cancellationToken);
             if (item == null)
                 throw new KeyNotFoundException($"Item with ID {request.ItemId} not found.");
 
@@ -32,17 +29,18 @@ namespace UniCare.Application.Item.Commands.UpdateItem
 
             if (request.CategoryId.HasValue)
             {
-                var categoryExists = await _context.Categories
-                    .AnyAsync(c => c.Id == request.CategoryId.Value, cancellationToken);
-
+                var categoryExists = await _categoryRepository.ExistsAsync(request.CategoryId.Value, cancellationToken);
                 if (!categoryExists)
                     throw new KeyNotFoundException($"Category with ID {request.CategoryId.Value} not found.");
             }
 
             Money? price = null;
-            if (request.Price.HasValue && !string.IsNullOrEmpty(request.Currency))
+            if (request.Price.HasValue)
             {
-                price = Money.Create(request.Price.Value, request.Currency);
+                var currency = !string.IsNullOrWhiteSpace(request.Currency)
+                    ? request.Currency
+                    : item.Price.Currency;
+                price = Money.Create(request.Price.Value, currency);
             }
 
             item.Update(
@@ -57,23 +55,19 @@ namespace UniCare.Application.Item.Commands.UpdateItem
                 request.ImageUrls
             );
 
-            if (!string.IsNullOrEmpty(request.Status) && Enum.TryParse<ItemStatus>(request.Status, out var status))
+            if (!string.IsNullOrEmpty(request.Status) &&
+                Enum.TryParse<ItemStatus>(request.Status, ignoreCase: true, out var status))
             {
                 item.UpdateStatus(status);
             }
 
-            await _context.SaveChangesAsync(cancellationToken);
+            await _itemRepository.UpdateAsync(item, cancellationToken);
 
-            item = await _context.Items
-                .Include(i => i.Owner)
-                .Include(i => i.Category)
-                .Include(i => i.FavoritedBy)
-                .FirstAsync(i => i.Id == request.ItemId, cancellationToken);
+            var updatedItem = await _itemRepository.GetItemWithDetailsAsync(request.ItemId, cancellationToken);
 
-            return ItemDtoMapper.Map(
-                item,
-                item.FavoritedBy.Any(f => f.UserId == request.RequestingUserId)
-            );
+            var isFavorited = updatedItem!.FavoritedBy.Any(f => f.UserId == request.RequestingUserId);
+
+            return ItemDtoMapper.Map(updatedItem, isFavorited);
         }
     }
 }

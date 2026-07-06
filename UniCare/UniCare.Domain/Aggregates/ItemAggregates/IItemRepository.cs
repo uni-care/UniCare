@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UniCare.Domain.Aggregates.UserAggregates;
 using UniCare.Domain.Common;
 using UniCare.Domain.Enums;
 
@@ -12,6 +13,7 @@ namespace UniCare.Domain.Aggregates.ItemAggregates
     {
         Task<List<Item>> GetAvailableItemsAsync(CancellationToken cancellationToken = default);
         Task<Item?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
+        Task<Item?> GetItemWithDetailsAsync(Guid id, CancellationToken cancellationToken = default);
         //to get paged items with total count
         Task<(List<Item> Items, int TotalCount, HashSet<Guid> FavoritedItemIds)> GetPagedAsync(
         int pageNumber,
@@ -27,5 +29,13 @@ namespace UniCare.Domain.Aggregates.ItemAggregates
         Guid itemId,
         Guid? currentUserId,
         CancellationToken cancellationToken = default);
+        Task<(List<UserFavorite> Favorites, int TotalCount)> GetFavoritesPagedAsync(
+        Guid userId,
+        Guid? categoryId,
+        string sortBy,
+        bool descending,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken);
     }
 }

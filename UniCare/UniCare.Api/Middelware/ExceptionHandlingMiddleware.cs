@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Text.Json;
 using UniCare.Application.Common;
 using FluentValidation;
@@ -74,7 +74,6 @@ namespace UniCare.Api.Middelware
         }
     }
 
-    /// <summary>Extension method to register <see cref="ExceptionHandlingMiddleware"/>.</summary>
     public static class ExceptionHandlingMiddlewareExtensions
     {
         public static IApplicationBuilder UseGlobalExceptionHandler(this IApplicationBuilder app)

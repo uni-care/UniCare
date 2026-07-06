@@ -99,12 +99,13 @@ public class Program
         app.UseHttpsRedirection();
         app.UseStaticFiles();
 
-        app.UseCors("AllowAll"); 
+        app.UseCors("MyCorsPolicy"); 
 
         app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();
+        app.UseInfrastructure();
 
         app.Run();
     }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,6 +40,16 @@ namespace UniCare.Infrastructure.Persistence.Repositories
                 .AsNoTracking()
                 .FirstOrDefaultAsync(i => i.Title == name, cancellationToken);
         }
+
+        public async Task<Item?> GetItemWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .Include(i => i.Owner)
+                .Include(i => i.Category)
+                .Include(i => i.FavoritedBy)
+                .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
+        }
         public async Task<(List<Item> Items, int TotalCount, HashSet<Guid> FavoritedItemIds)> GetPagedAsync(
         int pageNumber,
         int pageSize,
@@ -73,8 +83,9 @@ namespace UniCare.Infrastructure.Persistence.Repositories
             {
                 query = query.Where(i => EF.Property<decimal>(i.Price, "Amount") == 0m);
             }
-            if (availableOnly.HasValue) {
-                
+            if (availableOnly.HasValue)
+            {
+
                 query = query.Where(i => i.Status == ItemStatus.Available);
             }
             var orderedQuery = query.OrderByDescending(i => i.CreatedAt);
@@ -127,6 +138,47 @@ namespace UniCare.Infrastructure.Persistence.Repositories
             }
 
             return (item, isFavorited);
+        }
+        public async Task<(List<UserFavorite> Favorites, int TotalCount)> GetFavoritesPagedAsync(
+        Guid userId,
+        Guid? categoryId,
+        string sortBy,
+        bool descending,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken)
+        {
+            IQueryable<UserFavorite> query = _context.UserFavorites
+                .AsNoTracking()
+                .Include(uf => uf.Item)
+                    .ThenInclude(i => i.Owner)
+                .Include(uf => uf.Item)
+                    .ThenInclude(i => i.Category)
+                .Where(uf => uf.UserId == userId);
+
+            if (categoryId.HasValue)
+            {
+                query = query.Where(uf => uf.Item.CategoryId == categoryId);
+            }
+
+            query = (sortBy.ToLowerInvariant(), descending) switch
+            {
+                ("price", false) => query.OrderBy(uf => uf.Item.Price.Amount),
+                ("price", true) => query.OrderByDescending(uf => uf.Item.Price.Amount),
+                ("name", false) => query.OrderBy(uf => uf.Item.Title),
+                ("name", true) => query.OrderByDescending(uf => uf.Item.Title),
+                ("dateadded", false) => query.OrderBy(uf => uf.CreatedAt),
+                _ => query.OrderByDescending(uf => uf.CreatedAt)
+            };
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var favorites = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            return (favorites, totalCount);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
@@ -27,7 +27,6 @@ using UniCare.Infrastructure.services;
 using UniCare.Infrastructure.services.Ocr;
 using UniCare.Infrastructure.Services;
 using UniCare.Infrastructure.Settings;
-
 
 
 namespace UniCare.Infrastructure
@@ -85,6 +84,8 @@ namespace UniCare.Infrastructure
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
             .AddJwtBearer(options =>
             {
