@@ -1,35 +1,39 @@
 name: Deploy to Production via WebDeploy
-
 on:
   push:
     branches:
       - main
-
 jobs:
   deploy:
     runs-on: windows-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0' # Adjust based on your .NET version
-      
+          dotnet-version: '8.0'
+
       - name: Restore dependencies
         run: dotnet restore ./UniCare
-      
+
       - name: Build
         run: dotnet build ./UniCare --configuration Release --no-restore
-      
+
       - name: Publish
         run: dotnet publish ./UniCare --configuration Release --output ./publish
-      
-      - name: Deploy with WebDeploy
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: 'unicare'
-          package: './publish'
-          publish-profile: ${{ secrets.WEBDEPLOY_PROFILE }}
+
+      - name: Deploy with WebDeploy (MSDeploy)
+        shell: cmd
+        run: |
+          "C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe" ^
+            -verb:sync ^
+            -source:contentPath="./publish" ^
+            -dest:contentPath="${{ secrets.MONSTER_SITE_NAME }}",computerName="https://${{ secrets.MONSTER_PUBLISH_URL }}/msdeploy.axd?site=${{ secrets.MONSTER_SITE_NAME }}",userName="${{ secrets.MONSTER_USERNAME }}",password="${{ secrets.MONSTER_PASSWORD }}",authtype="Basic",includeAcls="False" ^
+            -allowUntrusted ^
+            -disableLink:AppPoolExtension ^
+            -disableLink:ContentExtension ^
+            -disableLink:CertificateExtension ^
+            -verbose
