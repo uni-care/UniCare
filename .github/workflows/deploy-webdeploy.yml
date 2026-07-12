@@ -1,0 +1,36 @@
+name: Deploy to Production via WebDeploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0' # Adjust based on your .NET version
+      
+      - name: Restore dependencies
+        run: dotnet restore
+      
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+      
+      - name: Publish
+        run: dotnet publish --configuration Release --output ./publish
+      
+      - name: Deploy with WebDeploy
+        uses: microsoft/parameterized-webdeploy-action@v1
+        with:
+          appName: 'unicare' # Your WebDeploy site name
+          package: './publish'
+          publishProfile: ${{ secrets.WEBDEPLOY_PROFILE }}
+          publishProfilePassword: ${{ secrets.WEBDEPLOY_PASSWORD }}
