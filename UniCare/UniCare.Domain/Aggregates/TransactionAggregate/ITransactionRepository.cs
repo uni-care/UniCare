@@ -26,6 +26,19 @@ namespace UniCare.Domain.Aggregates.TransactionAggregate
             int pageNumber,
             int pageSize,
             CancellationToken ct = default);
+        Task<(IReadOnlyList<Transaction> Items, int TotalCount)> GetBorrowsByRequesterAsync(
+           Guid requesterId,
+           LoanStatusFilter? statusFilter,
+           Guid? ownerId,
+           DateTime? loanedFrom,
+           DateTime? loanedTo,
+           DateTime? returnDueFrom,
+           DateTime? returnDueTo,
+           LoanSortBy sortBy,
+           bool sortDescending,
+           int pageNumber,
+           int pageSize,
+           CancellationToken ct = default);
 
         Task AddAsync(Transaction transaction, CancellationToken ct = default);
         Task UpdateAsync(Transaction transaction, CancellationToken ct = default);
