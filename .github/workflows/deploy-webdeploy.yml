@@ -28,9 +28,8 @@ jobs:
         run: dotnet publish --configuration Release --output ./publish
       
       - name: Deploy with WebDeploy
-        uses: microsoft/parameterized-webdeploy-action@v1
+        uses: azure/webapps-deploy@v2
         with:
-          appName: 'unicare' # Your WebDeploy site name
+          app-name: 'unicare'
           package: './publish'
-          publishProfile: ${{ secrets.WEBDEPLOY_PROFILE }}
-          publishProfilePassword: ${{ secrets.WEBDEPLOY_PASSWORD }}
+          publish-profile: ${{ secrets.WEBDEPLOY_PROFILE }}
