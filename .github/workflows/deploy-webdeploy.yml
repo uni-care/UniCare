@@ -30,11 +30,7 @@ jobs:
         run: choco install webdeploy -y --no-progress
 
       - name: Deploy with WebDeploy (MSDeploy)
-        shell: pwsh
+        shell: cmd
         run: |
-          $msdeploy = "C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe"
-          & $msdeploy --% -verb:sync -source:contentPath="./publish" -dest:contentPath="${{ secrets.MONSTER_SITE_NAME }}",computerName="https://${{ secrets.MONSTER_PUBLISH_URL }}/msdeploy.axd?site=${{ secrets.MONSTER_SITE_NAME }}",userName="${{ secrets.MONSTER_USERNAME }}",password="${{ secrets.MONSTER_PASSWORD }}",authtype="Basic",includeAcls="False" -allowUntrusted -disableLink:AppPoolExtension -disableLink:ContentExtension -disableLink:CertificateExtension -verbose
-          if ($LASTEXITCODE -ne 0) {
-            Write-Error "msdeploy failed with exit code $LASTEXITCODE"
-            exit $LASTEXITCODE
-          }
+          "C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe" -verb:sync -source:contentPath="./publish" -dest:contentPath="${{ secrets.MONSTER_SITE_NAME }}",computerName="https://${{ secrets.MONSTER_PUBLISH_URL }}/msdeploy.axd?site=${{ secrets.MONSTER_SITE_NAME }}",userName="${{ secrets.MONSTER_USERNAME }}",password="${{ secrets.MONSTER_PASSWORD }}",authtype="Basic",includeAcls="False" -allowUntrusted -disableLink:AppPoolExtension -disableLink:ContentExtension -disableLink:CertificateExtension -verbose
+          if %errorlevel% neq 0 exit /b %errorlevel%
