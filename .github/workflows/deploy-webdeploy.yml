@@ -28,21 +28,9 @@ jobs:
       - name: Install Web Deploy
         shell: pwsh
         run: choco install webdeploy -y --no-progress
-        
-      - name: Debug secret presence (no values printed)
-        shell: pwsh
-        run: |
-          $site = "${{ secrets.MONSTER_SITE_NAME }}"
-          $url  = "${{ secrets.MONSTER_PUBLISH_URL }}"
-          $user = "${{ secrets.MONSTER_USERNAME }}"
-          $pass = "${{ secrets.MONSTER_PASSWORD }}"
-          Write-Host "MONSTER_SITE_NAME length: $($site.Length)"
-          Write-Host "MONSTER_PUBLISH_URL length: $($url.Length)"
-          Write-Host "MONSTER_USERNAME length: $($user.Length)"
-          Write-Host "MONSTER_PASSWORD length: $($pass.Length)"
-          
+
       - name: Deploy with WebDeploy (MSDeploy)
         shell: cmd
         run: |
-          "C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe" -verb:sync -source:contentPath="./publish" -dest:contentPath="${{ secrets.MONSTER_SITE_NAME }}",computerName="https://${{ secrets.MONSTER_PUBLISH_URL }}/msdeploy.axd?site=${{ secrets.MONSTER_SITE_NAME }}",userName="${{ secrets.MONSTER_USERNAME }}",password="${{ secrets.MONSTER_PASSWORD }}",authtype="Basic",includeAcls="False" -allowUntrusted -disableLink:AppPoolExtension -disableLink:ContentExtension -disableLink:CertificateExtension -verbose
+          "C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe" -verb:sync -source:contentPath="%GITHUB_WORKSPACE%\publish" -dest:contentPath="${{ secrets.MONSTER_SITE_NAME }}",computerName="https://${{ secrets.MONSTER_PUBLISH_URL }}/msdeploy.axd?site=${{ secrets.MONSTER_SITE_NAME }}",userName="${{ secrets.MONSTER_USERNAME }}",password="${{ secrets.MONSTER_PASSWORD }}",authtype="Basic",includeAcls="False" -allowUntrusted -disableLink:AppPoolExtension -disableLink:ContentExtension -disableLink:CertificateExtension -verbose
           if %errorlevel% neq 0 exit /b %errorlevel%
