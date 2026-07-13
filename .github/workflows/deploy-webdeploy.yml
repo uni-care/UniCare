@@ -28,7 +28,19 @@ jobs:
       - name: Install Web Deploy
         shell: pwsh
         run: choco install webdeploy -y --no-progress
-
+        
+      - name: Debug secret presence (no values printed)
+        shell: pwsh
+        run: |
+          $site = "${{ secrets.MONSTER_SITE_NAME }}"
+          $url  = "${{ secrets.MONSTER_PUBLISH_URL }}"
+          $user = "${{ secrets.MONSTER_USERNAME }}"
+          $pass = "${{ secrets.MONSTER_PASSWORD }}"
+          Write-Host "MONSTER_SITE_NAME length: $($site.Length)"
+          Write-Host "MONSTER_PUBLISH_URL length: $($url.Length)"
+          Write-Host "MONSTER_USERNAME length: $($user.Length)"
+          Write-Host "MONSTER_PASSWORD length: $($pass.Length)"
+          
       - name: Deploy with WebDeploy (MSDeploy)
         shell: cmd
         run: |
