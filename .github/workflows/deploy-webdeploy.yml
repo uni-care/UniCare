@@ -33,15 +33,7 @@ jobs:
         shell: pwsh
         run: |
           $msdeploy = "C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe"
-          & $msdeploy `
-            -verb:sync `
-            -source:contentPath="./publish" `
-            -dest:contentPath="${{ secrets.MONSTER_SITE_NAME }}",computerName="https://${{ secrets.MONSTER_PUBLISH_URL }}/msdeploy.axd?site=${{ secrets.MONSTER_SITE_NAME }}",userName="${{ secrets.MONSTER_USERNAME }}",password="${{ secrets.MONSTER_PASSWORD }}",authtype="Basic",includeAcls="False" `
-            -allowUntrusted `
-            -disableLink:AppPoolExtension `
-            -disableLink:ContentExtension `
-            -disableLink:CertificateExtension `
-            -verbose
+          & $msdeploy --% -verb:sync -source:contentPath="./publish" -dest:contentPath="${{ secrets.MONSTER_SITE_NAME }}",computerName="https://${{ secrets.MONSTER_PUBLISH_URL }}/msdeploy.axd?site=${{ secrets.MONSTER_SITE_NAME }}",userName="${{ secrets.MONSTER_USERNAME }}",password="${{ secrets.MONSTER_PASSWORD }}",authtype="Basic",includeAcls="False" -allowUntrusted -disableLink:AppPoolExtension -disableLink:ContentExtension -disableLink:CertificateExtension -verbose
           if ($LASTEXITCODE -ne 0) {
             Write-Error "msdeploy failed with exit code $LASTEXITCODE"
             exit $LASTEXITCODE
