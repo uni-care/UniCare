@@ -42,8 +42,8 @@ jobs:
           $psi = New-Object System.Diagnostics.ProcessStartInfo
           $psi.FileName = $msdeploy
           $psi.ArgumentList.Add("-verb:sync")
-          $psi.ArgumentList.Add("-source:contentPath=`"$source`"")
-          $psi.ArgumentList.Add("-dest:contentPath=`"$site`",computerName=`"https://$url/msdeploy.axd?site=$site`",userName=`"$user`",password=`"$pass`",authtype=`"Basic`",includeAcls=`"False`"")
+          $psi.ArgumentList.Add("-source:contentPath=$source")
+          $psi.ArgumentList.Add("-dest:contentPath=$site,computerName=https://$url/msdeploy.axd?site=$site,userName=$user,password=$pass,authtype=Basic,includeAcls=False")
           $psi.ArgumentList.Add("-allowUntrusted")
           $psi.ArgumentList.Add("-disableLink:AppPoolExtension")
           $psi.ArgumentList.Add("-disableLink:ContentExtension")
