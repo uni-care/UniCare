@@ -142,6 +142,99 @@ namespace UniCare.Infrastructure.Repositories
 
             return (items, totalCount);
         }
+        public async Task<(IReadOnlyList<Transaction> Items, int TotalCount)> GetBorrowsByRequesterAsync(
+    Guid requesterId,
+    LoanStatusFilter? statusFilter,
+    Guid? ownerId,
+    DateTime? loanedFrom,
+    DateTime? loanedTo,
+    DateTime? returnDueFrom,
+    DateTime? returnDueTo,
+    LoanSortBy sortBy,
+    bool sortDescending,
+    int pageNumber,
+    int pageSize,
+    CancellationToken ct = default)
+        {
+            var now = DateTime.UtcNow;
+
+            // Base query: only rental transactions where the caller is the borrower/requester.
+            var query = _db.Transactions
+                .Where(t => t.RequesterId == requesterId && t.Type == TransactionType.Rental)
+                .AsNoTracking();
+
+            // ── Status filter (same derived semantics as the owner-side query) ─────────
+            if (statusFilter.HasValue)
+            {
+                query = statusFilter.Value switch
+                {
+                    LoanStatusFilter.PendingApproval =>
+                        query.Where(t => t.Status == TransactionStatus.PendingApproval),
+
+                    LoanStatusFilter.AwaitingHandover =>
+                        query.Where(t => t.Status == TransactionStatus.AwaitingHandover),
+
+                    LoanStatusFilter.Active =>
+                        query.Where(t =>
+                            t.Status == TransactionStatus.Active &&
+                            (!t.RentalReturnDue.HasValue || t.RentalReturnDue.Value >= now)),
+
+                    LoanStatusFilter.Overdue =>
+                        query.Where(t =>
+                            t.Status == TransactionStatus.Active &&
+                            t.RentalReturnDue.HasValue &&
+                            t.RentalReturnDue.Value < now),
+
+                    LoanStatusFilter.Returned =>
+                        query.Where(t => t.Status == TransactionStatus.Completed),
+
+                    LoanStatusFilter.Cancelled =>
+                        query.Where(t => t.Status == TransactionStatus.Cancelled),
+
+                    _ => query
+                };
+            }
+
+            if (ownerId.HasValue)
+                query = query.Where(t => t.OwnerId == ownerId.Value);
+
+            if (loanedFrom.HasValue)
+                query = query.Where(t => t.CreatedAt >= loanedFrom.Value);
+
+            if (loanedTo.HasValue)
+                query = query.Where(t => t.CreatedAt <= loanedTo.Value);
+
+            if (returnDueFrom.HasValue)
+                query = query.Where(t => t.RentalReturnDue.HasValue &&
+                                         t.RentalReturnDue.Value >= returnDueFrom.Value);
+
+            if (returnDueTo.HasValue)
+                query = query.Where(t => t.RentalReturnDue.HasValue &&
+                                         t.RentalReturnDue.Value <= returnDueTo.Value);
+
+            var totalCount = await query.CountAsync(ct);
+
+            query = (sortBy, sortDescending) switch
+            {
+                (LoanSortBy.LoanDate, true) => query.OrderByDescending(t => t.CreatedAt),
+                (LoanSortBy.LoanDate, false) => query.OrderBy(t => t.CreatedAt),
+
+                (LoanSortBy.ReturnDueDate, true) => query.OrderByDescending(t => t.RentalReturnDue),
+                (LoanSortBy.ReturnDueDate, false) => query.OrderBy(t => t.RentalReturnDue),
+
+                (LoanSortBy.Status, true) => query.OrderByDescending(t => t.Status),
+                (LoanSortBy.Status, false) => query.OrderBy(t => t.Status),
+
+                _ => query.OrderByDescending(t => t.CreatedAt)
+            };
+
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(ct);
+
+            return (items, totalCount);
+        }
 
         public async Task AddAsync(Transaction transaction, CancellationToken ct = default)
         {

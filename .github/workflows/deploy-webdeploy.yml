@@ -33,16 +33,27 @@ jobs:
         shell: pwsh
         run: |
           $msdeploy = "C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe"
-          & $msdeploy `
-            -verb:sync `
-            -source:contentPath="./publish" `
-            -dest:contentPath="${{ secrets.MONSTER_SITE_NAME }}",computerName="https://${{ secrets.MONSTER_PUBLISH_URL }}/msdeploy.axd?site=${{ secrets.MONSTER_SITE_NAME }}",userName="${{ secrets.MONSTER_USERNAME }}",password="${{ secrets.MONSTER_PASSWORD }}",authtype="Basic",includeAcls="False" `
-            -allowUntrusted `
-            -disableLink:AppPoolExtension `
-            -disableLink:ContentExtension `
-            -disableLink:CertificateExtension `
-            -verbose
-          if ($LASTEXITCODE -ne 0) {
-            Write-Error "msdeploy failed with exit code $LASTEXITCODE"
-            exit $LASTEXITCODE
+          $site   = "${{ secrets.MONSTER_SITE_NAME }}"
+          $url    = "${{ secrets.MONSTER_PUBLISH_URL }}"
+          $user   = "${{ secrets.MONSTER_USERNAME }}"
+          $pass   = "${{ secrets.MONSTER_PASSWORD }}"
+          $source = "$env:GITHUB_WORKSPACE\publish"
+
+          $psi = New-Object System.Diagnostics.ProcessStartInfo
+          $psi.FileName = $msdeploy
+          $psi.ArgumentList.Add("-verb:sync")
+          $psi.ArgumentList.Add("-source:contentPath=$source")
+          $psi.ArgumentList.Add("-dest:contentPath=$site,computerName=https://$url/msdeploy.axd?site=$site,userName=$user,password=$pass,authtype=Basic,includeAcls=False")
+          $psi.ArgumentList.Add("-allowUntrusted")
+          $psi.ArgumentList.Add("-disableLink:AppPoolExtension")
+          $psi.ArgumentList.Add("-disableLink:ContentExtension")
+          $psi.ArgumentList.Add("-disableLink:CertificateExtension")
+          $psi.ArgumentList.Add("-verbose")
+          $psi.UseShellExecute = $false
+
+          $proc = [System.Diagnostics.Process]::Start($psi)
+          $proc.WaitForExit()
+          if ($proc.ExitCode -ne 0) {
+            Write-Error "msdeploy failed with exit code $($proc.ExitCode)"
+            exit $proc.ExitCode
           }
