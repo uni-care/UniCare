@@ -1,28 +1,22 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UniCare.Application.Common;
+﻿using UniCare.Application.Common;
 using UniCare.Application.Common.cqrs;
 using UniCare.Application.Interfaces;
+using UniCare.Domain.Aggregates.ItemAggregates;
 using UniCare.Domain.Interfaces;
 
 namespace UniCare.Application.Item.Commands.UploadItemImage
 {
-
     public sealed class UploadItemImageCommandHandler
         : ICommandHandler<UploadItemImageCommand, Result<UploadItemImageResult>>
     {
-        private readonly IApplicationDbContext _db;
+        private readonly IItemRepository _itemRepository;
         private readonly IFileStorageService _storage;
 
         public UploadItemImageCommandHandler(
-            IApplicationDbContext db,
+            IItemRepository itemRepository,
             IFileStorageService storage)
         {
-            _db = db;
+            _itemRepository = itemRepository;
             _storage = storage;
         }
 
@@ -30,8 +24,7 @@ namespace UniCare.Application.Item.Commands.UploadItemImage
             UploadItemImageCommand command,
             CancellationToken cancellationToken)
         {
-            var item = await _db.Items
-                .FirstOrDefaultAsync(i => i.Id == command.ItemId, cancellationToken);
+            var item = await _itemRepository.GetByIdAsync(command.ItemId, cancellationToken);
 
             if (item is null)
                 return Result<UploadItemImageResult>.NotFound(
@@ -45,12 +38,11 @@ namespace UniCare.Application.Item.Commands.UploadItemImage
             var uploadResult = await _storage.UploadAsync(
                 command.FileContent, command.FileName, folder, cancellationToken);
 
-            // Append the new URL to the item's image list
             var updatedUrls = item.ImageUrls.ToList();
             updatedUrls.Add(uploadResult.Url);
             item.Update(imageUrls: updatedUrls);
 
-            await _db.SaveChangesAsync(cancellationToken);
+            await _itemRepository.UpdateAsync(item, cancellationToken);
 
             return Result<UploadItemImageResult>.Success(
                 new UploadItemImageResult(uploadResult.Url, uploadResult.PublicId));

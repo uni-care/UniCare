@@ -37,5 +37,10 @@ namespace UniCare.Domain.Aggregates.ItemAggregates
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken);
+        Task<List<Item>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default);
+        Task<UserFavorite?> GetFavoriteAsync(Guid userId, Guid itemId, CancellationToken cancellationToken = default);
+        Task AddFavoriteAsync(Guid userId, Guid itemId, CancellationToken cancellationToken = default);
+        Task RemoveFavoriteAsync(Guid userId, Guid itemId, CancellationToken cancellationToken = default);
     }
+
 }

@@ -1,27 +1,26 @@
 ﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
+using UniCare.Application.Common.Exceptions;
 using UniCare.Application.Item.DTOs;
+using UniCare.Domain.Aggregates.ItemAggregates;
 using UniCare.Domain.Interfaces;
 using UniCare.Domain.VOs;
-using UniCare.Application.Common.Exceptions;
-
 
 namespace UniCare.Application.Item.Commands.CreateItem
 {
     public class CreateItemCommandHandler : IRequestHandler<CreateItemCommand, ItemDto>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IItemRepository _itemRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
-        public CreateItemCommandHandler(IApplicationDbContext context)
+        public CreateItemCommandHandler(IItemRepository itemRepository, ICategoryRepository categoryRepository)
         {
-            _context = context;
+            _itemRepository = itemRepository;
+            _categoryRepository = categoryRepository;
         }
 
         public async Task<ItemDto> Handle(CreateItemCommand request, CancellationToken cancellationToken)
         {
-            var categoryExists = await _context.Categories
-                .AnyAsync(c => c.Id == request.CategoryId, cancellationToken);
-            Console.WriteLine($"Looking for CategoryId: {request.CategoryId}");
+            var categoryExists = await _categoryRepository.ExistsAsync(request.CategoryId, cancellationToken);
             if (!categoryExists)
                 throw new NotFoundException(nameof(Category), request.CategoryId);
 
@@ -40,15 +39,11 @@ namespace UniCare.Application.Item.Commands.CreateItem
                 request.ImageUrls
             );
 
-            _context.Items.Add(item);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _itemRepository.AddAsync(item, cancellationToken);
 
-            item = await _context.Items
-                .Include(i => i.Owner)
-                .Include(i => i.Category)
-                .FirstAsync(i => i.Id == item.Id, cancellationToken);
+            var createdItem = await _itemRepository.GetItemWithDetailsAsync(item.Id, cancellationToken);
 
-            return ItemDtoMapper.Map(item);
+            return ItemDtoMapper.Map(createdItem!);
         }
     }
 }

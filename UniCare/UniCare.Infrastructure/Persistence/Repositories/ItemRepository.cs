@@ -180,5 +180,38 @@ namespace UniCare.Infrastructure.Persistence.Repositories
 
             return (favorites, totalCount);
         }
+        public async Task<List<Item>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .Include(i => i.Owner)
+                .Include(i => i.Category)
+                .Where(i => ids.Contains(i.Id))
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<UserFavorite?> GetFavoriteAsync(Guid userId, Guid itemId, CancellationToken cancellationToken = default)
+        {
+            return await _context.UserFavorites
+                .FirstOrDefaultAsync(f => f.UserId == userId && f.ItemId == itemId, cancellationToken);
+        }
+
+        public async Task AddFavoriteAsync(Guid userId, Guid itemId, CancellationToken cancellationToken = default)
+        {
+            var favorite = UserFavorite.Create(userId, itemId);
+            _context.UserFavorites.Add(favorite);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task RemoveFavoriteAsync(Guid userId, Guid itemId, CancellationToken cancellationToken = default)
+        {
+            var favorite = await _context.UserFavorites
+                .FirstOrDefaultAsync(f => f.UserId == userId && f.ItemId == itemId, cancellationToken);
+            if (favorite != null)
+            {
+                _context.UserFavorites.Remove(favorite);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+        }
     }
 }
