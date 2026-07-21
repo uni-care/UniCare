@@ -7,7 +7,7 @@ using UniCare.Domain.Aggregates.TransactionAggregate;
 using UniCare.Domain.Aggregates.TransactionHandoverAggregate;
 using Xunit;
 
-namespace UniCare.Tests.Application.Tests.Handlers
+namespace UniCare.Tests.Application.Tests.Handlers.Transactions
 {
     public class VerifyAndAdvanceTransactionCommandHandlerTests
     {

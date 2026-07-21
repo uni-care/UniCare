@@ -2,7 +2,7 @@ using System;
 using UniCare.Application.Chats.Commands.SendMessage;
 using Xunit;
 
-namespace UniCare.Tests.Application.Tests.Validators
+namespace UniCare.Tests.Application.Tests.Validators.Chats
 {
     public class SendMessageCommandValidatorTests
     {

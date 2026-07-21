@@ -3,7 +3,7 @@ using UniCare.Application.Transactions.Commands.CreateTransaction;
 using UniCare.Domain.Aggregates.TransactionAggregate;
 using Xunit;
 
-namespace UniCare.Tests.Application.Tests.Validators
+namespace UniCare.Tests.Application.Tests.Validators.Transactions
 {
     public class CreateTransactionCommandValidatorTests
     {

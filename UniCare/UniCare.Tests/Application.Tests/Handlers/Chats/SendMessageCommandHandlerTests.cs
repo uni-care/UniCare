@@ -6,7 +6,7 @@ using UniCare.Application.Chats.Commands.SendMessage;
 using UniCare.Domain.Aggregates.ChatAggregate;
 using Xunit;
 
-namespace UniCare.Tests.Application.Tests.Handlers
+namespace UniCare.Tests.Application.Tests.Handlers.Chats
 {
     public class SendMessageCommandHandlerTests
     {

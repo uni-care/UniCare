@@ -6,7 +6,7 @@ using UniCare.Application.Transactions.Commands.CreateTransaction;
 using UniCare.Domain.Aggregates.TransactionAggregate;
 using Xunit;
 
-namespace UniCare.Tests.Application.Tests.Handlers
+namespace UniCare.Tests.Application.Tests.Handlers.Transactions
 {
     public class CreateTransactionCommandHandlerTests
     {
